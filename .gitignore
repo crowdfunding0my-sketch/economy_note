@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.csv
+
+# outputフォルダは基本的に除外するが、Stage B/Cのローカル⇔クラウド間の受け渡しに使う
+# 2ファイルだけは追跡する（他の下書き・状態ファイル・CSV等は引き続き除外）
+output/*
+!output/us_trend_candidates.json
+!output/us_premium_rotation_candidates.json
