@@ -255,29 +255,50 @@ Alpha Vantageは日本株のニュース・ファンダメンタルズカバレ�
 
 ### 構成
 
-米国株と同様、**完全自動化できる部分**と**Claude経由でしか実行できない部分**を分離した。
+米国株のStage Cだけ、Woodstockの`get_fundamentals`がこのClaude環境経由でしか呼べないため、
+**ローカル（Windowsタスクスケジューラ）とクラウド（`/schedule`のクラウドルーチン）をGitHub経由で
+連携させる構成**にした。
 
 | 実行対象 | 頻度 | 方法 | 所要時間 |
 |---|---|---|---|
-| `src/main.py`（FRED・BLS・米国株ローテーション・記事下書き組み立て） | 毎日 7:00 | Windowsタスクスケジューラ | 数十秒 |
+| `src/main.py`（FRED・BLS・FRB発表・米国株ローテーション・記事下書き組み立て） | 毎日 7:00 | Windowsタスクスケジューラ（`scripts/run_daily.ps1`、git pull後に実行） | 数十秒 |
 | `src/fetchers/jquants_screener.py`（日本株の全銘柄スクリーニング） | 毎週土曜 8:00 | Windowsタスクスケジューラ | 約14.5時間（Freeプランのレート制限のため） |
-| Stage C（米国株候補15銘柄の再選定、Woodstock `get_fundamentals`） | 週1〜2週に1回目安 | **このClaude環境で都度実行**（自動化不可） | 未定 |
+| Stage B（米国株の株価トレンド一次スクリーニング） | 毎週土曜 6:00 | Windowsタスクスケジューラ（`scripts/run_weekly_stage_b.ps1`、結果をGitHubにpush） | 数分 |
+| Stage C（米国株候補15銘柄の再選定、Woodstock `get_fundamentals`） | 毎週土曜 9:00 JST | **`/schedule`のクラウドルーチン**（Woodstock MCP接続済み、GitHubから結果をpull/push） | 数分〜十数分 |
 | noteへの実際の投稿 | 都度 | **手動**（下書きをコピー＆ペースト、有料エリアの区切りを設定） | - |
 
-### 実装したタスク（2026-08-24, タスクスケジューラに登録済み）
+### GitHub連携の仕組み
 
-- `SoubaNote_DailyMain`：毎日7:00、`python src/main.py` を実行
-- `SoubaNote_WeeklyJPScan`：毎週土曜8:00、`python src/fetchers/jquants_screener.py` を実行
-  （土曜の朝に開始することで、約14.5時間かかっても同日中に完了し、日曜・月曜の記事には
-  最新のキャッシュが反映される）
+- リポジトリ：https://github.com/crowdfunding0my-sketch/economy_note （2026-08-24 初回push済み）
+- `.gitignore`は`output/*`を基本除外しつつ、`us_trend_candidates.json`（Stage B結果）と
+  `us_premium_rotation_candidates.json`（Stage C結果＝最終候補15銘柄）の2ファイルだけ例外的に追跡する。
+  `.env`・状態ファイル・CSV・下書きはこれまで通り除外（秘密情報はリポジトリに一切含まれない）。
+- 実行順序：土曜6:00（ローカルStage B→push）→土曜9:00（クラウドStage C→pull・決算チェック・push）
+  →日曜以降の毎朝7:00（ローカルmain.pyがgit pullしてから実行、最新の候補リストを反映）
 
-`article_builder.py`の日本株ピックアップは、この週次キャッシュ（`output/screening_result_*.csv`の
-最新ファイル）を読み込む方式にした（`main.py`には日本株の全銘柄走査を含めない）。
+### 実装したタスク（2026-08-24）
+
+**Windowsタスクスケジューラ**
+- `SoubaNote_DailyMain`：毎日7:00、`scripts/run_daily.ps1`（git pull → `main.py`）
+- `SoubaNote_WeeklyJPScan`：毎週土曜8:00、`python src/fetchers/jquants_screener.py`
+- `SoubaNote_WeeklyUSStageB`：毎週土曜6:00、`scripts/run_weekly_stage_b.ps1`（git pull →
+  `alpaca_price_trend.py` → 変更があればcommit・push）
+
+**クラウドルーチン（`/schedule`）**
+- 名前：`SoubaNote Stage C - US Stock Fundamentals Screen`（id: `trig_015nGFr1XULrHXHUP6vjBZD6`）
+- 毎週土曜 9:00 JST（`0 0 * * 6` UTC）、Woodstock MCP接続済み
+- URL: https://claude.ai/code/routines/trig_015nGFr1XULrHXHUP6vjBZD6
+- 処理：`output/us_trend_candidates.json`を読み、各銘柄のWoodstock `get_fundamentals`を並列で
+  呼び出し、「売上高が前期比増加」「時価総額150億ドル以下」の2条件と株価上昇率順で上位15銘柄を
+  選定し、`output/us_premium_rotation_candidates.json`を更新してcommit・push
+
+**PowerShellスクリプト実行時の注意（実機で発生・解決済み）**
+- `.ps1`ファイルに日本語（プロジェクトパスの「作業場」「相場」等）が含まれる場合、UTF-8 BOM無しで
+  保存するとWindows PowerShell 5.1がパースに失敗する（パスが文字化けし`Set-Location`が失敗する等）。
+  `Set-Content -Encoding utf8`（BOM付き）で保存する必要がある。
 
 ### 未確定事項
 
-- Stage C（米国株の決算チェック）の再実行は自動化されていない。手動でこのClaude環境を呼び出すか、
-  `/schedule`スキルでクラウド定期実行を組むかは未確定。
 - タスクスケジューラのタスクは「ユーザーログオン時のみ実行」がデフォルト設定。PCの電源が切れている
   時間帯は実行されない点に注意（現状はこれで運用、必要になれば「ログオンしていなくても実行」への
   変更を検討）。
