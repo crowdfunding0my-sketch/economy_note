@@ -11,6 +11,14 @@ S&P500・NASDAQ・ダウ平均などのコア指数も同じAPIでまとめて�
 - CPILFESL：コアCPI（食品・エネルギー除く、季節調整済み、月次）
 - UNRATE：失業率（月次）
 - PAYEMS：非農業部門雇用者数（月次、雇用統計の目玉指標）
+- GACDFSA066MSFRBPHI / GACDISA066MSFRBNY：フィラデルフィア連銀・NY連銀(Empire State)の
+  製造業景況感調査（月次、PMIの代替指標）。
+
+【PMI（ISM・S&P Global）について】
+正式なISM PMI・S&P Global PMIは無料APIが存在しない（ISMは2016年にFREDへのデータ提供を終了。
+S&P Globalは購読契約が必要）ため、本ツールでは代わりに地区連銀の製造業サーベイ（無料・FRED）を
+「PMI発表前に市場が参照する先行指標」として採用している。ただし尺度が異なる点に注意：
+PMIは50が拡大/縮小の境目だが、これらの地区連銀指数は**0が境目**のディフュージョンインデックス。
 
 使い方:
   1. .env に FRED_API_KEY をセット
@@ -41,6 +49,8 @@ SERIES = [
     ("CPILFESL", "コアCPI（食品・エネルギー除く）", "monthly"),
     ("UNRATE", "失業率", "monthly"),
     ("PAYEMS", "非農業部門雇用者数", "monthly"),
+    ("GACDFSA066MSFRBPHI", "フィラデルフィア連銀製造業景況指数（PMI代替）", "monthly"),
+    ("GACDISA066MSFRBNY", "NY連銀 Empire State製造業指数（PMI代替）", "monthly"),
 ]
 
 
@@ -92,18 +102,20 @@ def summarize_monthly(observations):
     target_year_ago = latest_date.replace(year=latest_date.year - 1).strftime("%Y-%m-%d")
     year_ago = next((o for o in observations if o["date"] == target_year_ago), None)
 
+    # 地区連銀の景況指数など0をまたぐ系列は前月比%が0除算・無意味な値になりうるため、
+    # 分母が0の場合はNoneにする（表示側はpt差[mom_diff/yoy_diff]を使う）
     result = {
         "latest_date": latest["date"],
         "latest_value": latest_val,
         "prev_month_date": prev_month["date"],
-        "mom_diff": round(latest_val - prev_val, 5),  # ptの差分（失業率など「率」の系列の表示用）
-        "mom_change_rate": round((latest_val - prev_val) / prev_val, 5),
+        "mom_diff": round(latest_val - prev_val, 5),  # ptの差分（失業率・景況指数など「率」でない系列の表示用）
+        "mom_change_rate": round((latest_val - prev_val) / prev_val, 5) if prev_val != 0 else None,
     }
     if year_ago:
         year_ago_val = float(year_ago["value"])
         result["year_ago_date"] = year_ago["date"]
         result["yoy_diff"] = round(latest_val - year_ago_val, 5)
-        result["yoy_change_rate"] = round((latest_val - year_ago_val) / year_ago_val, 5)
+        result["yoy_change_rate"] = round((latest_val - year_ago_val) / year_ago_val, 5) if year_ago_val != 0 else None
     else:
         result["year_ago_date"] = None
         result["yoy_diff"] = None

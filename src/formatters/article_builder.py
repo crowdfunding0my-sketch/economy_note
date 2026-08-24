@@ -120,9 +120,11 @@ def build_indicators_section(fred, bls):
         "CPILFESL": "コアCPI（食品・エネルギー除く）",
         "UNRATE": "失業率",
         "PAYEMS": "非農業部門雇用者数",
+        "GACDFSA066MSFRBPHI": "フィラデルフィア連銀製造業指数（PMI代替）",
+        "GACDISA066MSFRBNY": "NY連銀 Empire State製造業指数（PMI代替）",
     }
-    # 失業率は「率の変化率(%)」だと誤解を招く（4.2%→4.1%が「-2.4%」に見えてしまう）ため、pt差で表示する
-    point_diff_series = {"UNRATE"}
+    # 失業率・地区連銀の景況指数は「率の変化率(%)」だと誤解を招く/0除算になりうるため、pt差で表示する
+    point_diff_series = {"UNRATE", "GACDFSA066MSFRBPHI", "GACDISA066MSFRBNY"}
     if fred:
         lines.append("| 指標 | 最新値 | 前月比 | 前年同月比 |")
         lines.append("|---|---|---|---|")
@@ -139,7 +141,9 @@ def build_indicators_section(fred, bls):
             lines.append(f"| {label}（{s['latest_date']}） | {s['latest_value']:,.3f} | {mom} | {yoy} |")
         lines.append("")
     lines.append("> 数値は特に断りがない限りFRED（セントルイス連銀）を情報源としています。"
-                  "指標発表当日はBLS（米労働省統計局）一次発表の速報値を優先して反映します。")
+                  "指標発表当日はBLS（米労働省統計局）一次発表の速報値を優先して反映します。"
+                  "正式なISM/S&P Global PMIは無料での取得元が無いため、地区連銀の製造業サーベイを"
+                  "PMI発表前の先行指標として代わりに掲載しています（0が拡大/縮小の境目）。")
     lines.append("")
     return "\n".join(lines)
 
