@@ -29,6 +29,42 @@ OUTPUT_DIR = PROJECT_ROOT / "output"
 
 JP_PICKS_SHOWN = 3  # 日本株ピックアップで本文に載せる件数
 
+# 投資初心者向けの用語解説。外部リンクではなく記事内で完結させる方針（note.comは
+# サイドバー的なレイアウトを作れないため）。各セクションで使う用語をあらかじめ紐付けておき、
+# 「用語解説」セクションとして自動生成する。
+GLOSSARY = {
+    "CPI": "消費者物価指数。モノやサービスの値段が全体としてどれくらい上がった/下がったかを示す、物価の「体温計」のような指標。",
+    "コアCPI": "CPIから、値動きの大きい食品・エネルギーを除いた指標。物価の基調的な動きを見るのに使われる。",
+    "失業率": "働く意思のある人のうち、実際に仕事に就けていない人の割合。",
+    "非農業部門雇用者数": "農業以外の産業で新たに増えた雇用者数。米国の景気を測る代表的な指標の一つ。",
+    "PMI": "購買担当者景気指数。企業の仕入れ担当者への調査をもとにした景況感の指数（50が拡大/縮小の境目）。"
+           "正式なPMIは無料で取得できないため、本記事では代わりに地区連銀の製造業サーベイ（0が境目）を掲載している。",
+    "FOMC": "米連邦公開市場委員会。FRB（米国の中央銀行にあたる組織）の中で、政策金利などの金融政策を決める会合。",
+    "FRB": "米連邦準備制度理事会。日本で言う日本銀行にあたる、米国の中央銀行。",
+    "PER": "株価収益率。株価が1株あたり利益の何倍まで買われているかを示す指標。数字が低いほど「割安」とされる。",
+    "時価総額": "株価 × 発行済み株式数。その会社が株式市場でどれくらいの規模と評価されているかを表す。",
+    "EPS": "1株あたり利益。会社の利益を発行済み株式数で割ったもの。プラスなら黒字、マイナスなら赤字。",
+    "R²（決定係数）": "株価の推移が、どれだけ一貫して同じ方向に動いているかを0〜1の数値で表したもの。"
+                     "1に近いほど値動きにブレが少なく、一貫した傾向と言える。",
+    "ドルインデックス": "ドルが主要な複数通貨に対して全体としてどれくらい強い/弱いかを示す指数。",
+    "レバレッジド・マネー": "ヘッジファンドなど、借入等を活用して積極的に売買する投資家層を指すCFTC（米商品先物取引委員会）の分類。",
+    "ネットポジション": "買い建玉（買いの契約数）から売り建玉（売りの契約数）を差し引いた数。プラスなら買い越し、マイナスなら売り越し。",
+}
+
+# 無料エリア／有料エリアそれぞれで登場する用語（記事の構成が概ね固定のため静的に対応付けている）
+FREE_AREA_TERMS = ["CPI", "コアCPI", "失業率", "非農業部門雇用者数", "PMI", "FOMC", "FRB", "PER"]
+PAID_AREA_TERMS = ["時価総額", "EPS", "R²（決定係数）", "ドルインデックス", "レバレッジド・マネー", "ネットポジション"]
+
+
+def build_glossary_section(term_keys, heading="## 📘 用語解説"):
+    lines = [heading, ""]
+    for term in term_keys:
+        explanation = GLOSSARY.get(term)
+        if explanation:
+            lines.append(f"- **{term}**：{explanation}")
+    lines.append("")
+    return "\n".join(lines)
+
 
 def _latest_csv_rows(pattern):
     """最新の日本株スクリーニング結果CSV（週次実行でキャッシュされたもの）を読み込む"""
@@ -337,6 +373,7 @@ def build_article():
         build_indicators_section(fred, bls),
         build_fed_section(fed),
         build_jp_pick_section(),
+        build_glossary_section(FREE_AREA_TERMS),
         "---",
         "",
         build_us_pick_teaser(candidates_data, state),
@@ -347,6 +384,7 @@ def build_article():
         "",
         build_us_pick_full(candidates_data, state) if candidates_data and state else "",
         build_fx_section(fx),
+        build_glossary_section(PAID_AREA_TERMS, heading="## 📘 用語解説（有料エリアの用語）"),
     ]
     return "\n".join(parts)
 
