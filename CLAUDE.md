@@ -235,7 +235,7 @@ Alpha Vantageは日本株のニュース・ファンダメンタルズカバレ�
 
 **有料エリア本体**
 - 本日の米国株ピック：銘柄名＋直近決算＋最新ニュース＋展望（フル情報）
-- ドルインデックス・ドル円・クロス円動向（**未実装**：FREDのBroad Dollar Index(DTWEXBGS)とAlpha VantageのFXデータを使用予定）
+- ドルインデックス・ドル円・クロス円動向＋CFTC投機筋の円先物ポジション（詳細は下記「為替・投機筋ポジション」参照）
 
 ### 実装上の注意
 
@@ -271,6 +271,33 @@ Alpha Vantageは日本株のニュース・ファンダメンタルズカバレ�
 
 実装: [src/formatters/thumbnail_generator.py](src/formatters/thumbnail_generator.py)（`main.py`の最終ステップとして実行）
 
+### 為替・投機筋ポジション（方針決定・実装済み、2026-08-24）
+
+「他ではなかなか得られない情報を有料エリアに盛り込みたい」という要望を受け、一般的なFXレートに加えて
+**CFTC（米商品先物取引委員会）の建玉報告（Traders in Financial Futures, TFF）から、
+ヘッジファンド等「レバレッジド・マネー」の円先物ネットポジション**を追加した。個人向けの相場記事では
+ほとんど扱われないが、プロのFXトレーダーは「スマートマネーがどちらに賭けているか」の参考にする
+データで、有料エリアの差別化要素として採用。
+
+**データソース**
+- FRED：`DTWEXBGS`（名目広義ドル指数＝ドルインデックス相当、26通貨バスケット。ICE公表の
+  一般的なDXY(6通貨)とは構成が異なる点を記事内に明記）、`DEXJPUS`（ドル円）、`DEXUSEU`・`DEXUSUK`
+  （ユーロドル・ポンドドルからユーロ円・ポンド円を算出）。為替データはFRED発表の都合上、
+  数日〜1週間程度のラグがある（記事内に明記）。
+- CFTC：`publicreporting.cftc.gov`のSocrata Open Data API（**認証不要・無料**）。
+  データセット`gpe5-46if`（TFF Futures Only）から`market_and_exchange_names`が
+  `JAPANESE YEN - CHICAGO MERCANTILE EXCHANGE`と**完全一致**する行を取得し、
+  `lev_money_positions_long`/`short`からネットポジション（買い建玉－売り建玉）と前週比を算出。
+  毎週金曜発表、直近火曜時点のデータ。
+
+**実装上の注意（実機で発生・修正済み）**
+- `market_and_exchange_names like '%JAPANESE YEN%'`という曖昧検索だと、別契約の
+  「EURO FX/JAPANESE YEN XRATE」（ユーロ円クロス先物）まで拾ってしまい、同じ日付で異なる契約の
+  行が混ざって前週比の計算を誤る不具合があった。完全一致（`=`）に修正して解決した。
+
+実装: [src/fetchers/fx_indicators.py](src/fetchers/fx_indicators.py)（`article_builder.py`の
+「ドルインデックス・ドル円・クロス円動向」セクションに統合、動作確認済み）
+
 ---
 
 ## 6. 自動実行の仕組み（方針決定・実装済み）
@@ -283,7 +310,7 @@ Alpha Vantageは日本株のニュース・ファンダメンタルズカバレ�
 
 | 実行対象 | 頻度 | 方法 | 所要時間 |
 |---|---|---|---|
-| `src/main.py`（FRED・BLS・FRB発表・米国株ローテーション・記事下書き組み立て・サムネイル生成） | 毎日 7:00 | Windowsタスクスケジューラ（`scripts/run_daily.ps1`、git pull後に実行） | 1分程度 |
+| `src/main.py`（FRED・BLS・FRB発表・為替/CFTC・米国株ローテーション・記事下書き組み立て・サムネイル生成） | 毎日 7:00 | Windowsタスクスケジューラ（`scripts/run_daily.ps1`、git pull後に実行） | 1分程度 |
 | `src/fetchers/jquants_screener.py`（日本株の全銘柄スクリーニング） | 毎週土曜 8:00 | Windowsタスクスケジューラ | 約14.5時間（Freeプランのレート制限のため） |
 | Stage B（米国株の株価トレンド一次スクリーニング） | 毎週土曜 6:00 | Windowsタスクスケジューラ（`scripts/run_weekly_stage_b.ps1`、結果をGitHubにpush） | 数分 |
 | Stage C（米国株候補15銘柄の再選定、Woodstock `get_fundamentals`） | 毎週土曜 9:00 JST | **`/schedule`のクラウドルーチン**（Woodstock MCP接続済み、GitHubから結果をpull/push） | 数分〜十数分 |

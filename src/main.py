@@ -8,8 +8,9 @@
   3. FRB公式発表（一次情報。RSSフィードから新着を検知）
   4. 米国株ローテーション（Alpacaの直接APIで取得済みの候補15銘柄から本日の1銘柄を選び、
      Alpha Vantageで最新ニュースを取得）
-  5. 上記を踏まえたnote記事下書きの組み立て
-  6. サムネイル画像の生成（記事の内容が確定した後、本日の注目株の分野キーワードでPixabay検索）
+  5. ドルインデックス・ドル円・クロス円（FRED）＋CFTC投機筋の円先物ポジション（有料エリア）
+  6. 上記を踏まえたnote記事下書きの組み立て
+  7. サムネイル画像の生成（記事の内容が確定した後、本日の注目株の分野キーワードでPixabay検索）
 
 以下は自動化の対象外（別途手動 or 別の仕組みが必要）:
   - 日本株の全銘柄スクリーニング（J-Quants Freeプランでは全銘柄走査に十数時間かかるため、
@@ -35,25 +36,29 @@ sys.path.insert(0, str(PROJECT_ROOT / "src" / "formatters"))
 import fred_indicators
 import bls_indicators
 import fed_press_releases
+import fx_indicators
 import us_stock_rotation
 import article_builder
 import thumbnail_generator
 
 
 def main():
-    print("=== 1/6 FRED経済指標を取得 ===")
+    print("=== 1/7 FRED経済指標を取得 ===")
     fred_indicators.run()
 
-    print("\n=== 2/6 BLS経済指標を取得（発表日判定込み） ===")
+    print("\n=== 2/7 BLS経済指標を取得（発表日判定込み） ===")
     bls_indicators.run()
 
-    print("\n=== 3/6 FRB公式発表を取得（新着判定込み） ===")
+    print("\n=== 3/7 FRB公式発表を取得（新着判定込み） ===")
     fed_press_releases.run()
 
-    print("\n=== 4/6 本日の米国株ピックを選定・ニュース取得 ===")
+    print("\n=== 4/7 ドル指数・ドル円・クロス円・CFTC円先物ポジションを取得 ===")
+    fx_indicators.run()
+
+    print("\n=== 5/7 本日の米国株ピックを選定・ニュース取得 ===")
     us_stock_rotation.run()
 
-    print("\n=== 5/6 note記事下書きを組み立て ===")
+    print("\n=== 6/7 note記事下書きを組み立て ===")
     article = article_builder.build_article()
     out_dir = PROJECT_ROOT / "output"
     out_dir.mkdir(exist_ok=True)
@@ -63,7 +68,7 @@ def main():
         f.write(article)
     print(f"記事下書きを保存しました: {out_path}")
 
-    print("\n=== 6/6 サムネイル画像を生成 ===")
+    print("\n=== 7/7 サムネイル画像を生成 ===")
     thumbnail_generator.run()
 
 

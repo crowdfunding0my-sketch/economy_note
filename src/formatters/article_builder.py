@@ -258,10 +258,65 @@ def build_us_pick_full(candidates_data, state):
     return "\n".join(lines)
 
 
+def build_fx_section(fx):
+    """
+    有料エリア：ドルインデックス・ドル円・クロス円動向＋CFTC投機筋ポジション。
+    一般的なFXレートに加えて「他ではなかなか得られない情報」として、
+    CFTCのTraders in Financial Futuresレポートから円先物のレバレッジド・マネー
+    （ヘッジファンド等）のネットポジションを載せる（プロのFXトレーダー向けの視点）。
+    """
+    lines = ["## ドルインデックス・ドル円・クロス円動向（有料エリア）", ""]
+    if not fx:
+        lines.append("（為替データ未取得です）")
+        lines.append("")
+        return "\n".join(lines)
+
+    rates = fx.get("fx_rates", {})
+    cross = fx.get("cross_yen", {})
+
+    dxy = (rates.get("DTWEXBGS") or {}).get("summary")
+    usdjpy = (rates.get("DEXJPUS") or {}).get("summary")
+    if dxy:
+        lines.append(f"- **ドルインデックス**（FRED広義ドル指数）：{dxy['latest_value']:.2f}（前日比 {_pct(dxy['change_rate'])}）")
+    if usdjpy:
+        lines.append(f"- **ドル円**：{usdjpy['latest_value']:.2f}円（前日比 {_pct(usdjpy['change_rate'])}）")
+    for pair, label in [("EURJPY", "ユーロ円"), ("GBPJPY", "ポンド円")]:
+        c = cross.get(pair)
+        if c:
+            lines.append(f"- **{label}**（算出値）：{c['latest_value']:.2f}円（前日比 {_pct(c['change_rate'])}）")
+    lines.append("")
+    lines.append("> ドルインデックスはICE公表の一般的なDXY（6通貨）とは構成通貨が異なる代替指標です。"
+                 "為替データはFRED発表の都合上、数日〜1週間程度のラグがあります。")
+    lines.append("")
+
+    positioning = fx.get("jpy_futures_positioning")
+    if positioning:
+        lines.append("### 【差がつく情報】投機筋の円先物ポジション（CFTC）")
+        lines.append("")
+        lines.append("個人向けの相場記事ではほとんど扱われませんが、CFTC（米商品先物取引委員会）が"
+                     "毎週発表する建玉報告から、ヘッジファンド等の「レバレッジド・マネー」が"
+                     "円先物をどちらに賭けているかが分かります。")
+        lines.append("")
+        net = positioning["net_position"]
+        change = positioning["net_position_change"]
+        change_word = "積み増し" if (net < 0) == (change < 0) else "巻き戻し"
+        lines.append(
+            f"- レバレッジド・マネーの円先物ネットポジション：**{net:+,}枚（{positioning['direction']}）**"
+            f"（{positioning['report_date']}時点、前週比 {change:+,}枚の{change_word}）"
+        )
+        lines.append(f"- 買い建玉 {positioning['lev_money_long']:,}枚 / 売り建玉 {positioning['lev_money_short']:,}枚")
+        lines.append("")
+        lines.append(f"> 出典：CFTC Traders in Financial Futures（TFF）レポート。"
+                     f"{positioning['prev_report_date']}→{positioning['report_date']}の変化。")
+        lines.append("")
+    return "\n".join(lines)
+
+
 def build_article():
     fred = _latest_json("fred_indicators_*.json")
     bls = _latest_json("bls_indicators_*.json")
     fed = _latest_json("fed_press_releases_*.json")
+    fx = _latest_json("fx_indicators_*.json")
     candidates_data = _latest_json("us_premium_rotation_candidates.json")
     state = _latest_json("rotation_state.json")
 
@@ -287,10 +342,7 @@ def build_article():
         "## ここから有料エリア",
         "",
         build_us_pick_full(candidates_data, state) if candidates_data and state else "",
-        "## ドルインデックス・ドル円・クロス円動向（有料エリア）",
-        "",
-        "（未実装：FREDのBroad Dollar Index(DTWEXBGS)とAlpha VantageのFXデータを使って追加予定）",
-        "",
+        build_fx_section(fx),
     ]
     return "\n".join(parts)
 
