@@ -162,6 +162,10 @@ def build_indicators_section(fred, bls):
     # 失業率・地区連銀の景況指数は「率の変化率(%)」だと誤解を招く/0除算になりうるため、pt差で表示する
     point_diff_series = {"UNRATE", "GACDFSA066MSFRBPHI", "GACDISA066MSFRBNY"}
     if fred:
+        lines.append("【note投稿時のご案内】note.comはMarkdownの表をそのまま貼っても表示されません。"
+                      "下の表は参考用です。note投稿時は `output/tables/indicators_table_*.png` "
+                      "（この位置に挿入する想定で自動生成済み）を画像として貼り付けてください。")
+        lines.append("")
         lines.append("| 指標 | 最新値 | 前月比 | 前年同月比 |")
         lines.append("|---|---|---|---|")
         for sid, label in fred_labels.items():
@@ -352,6 +356,31 @@ def build_fx_section(fx):
     return "\n".join(lines)
 
 
+def build_hashtags(fred, bls, fed):
+    """
+    その日の記事内容に応じたハッシュタグを生成する。固定の基本タグに加えて、
+    BLSの発表日フラグ・FRBの新着発表があれば、その日ならではのタグを追加する。
+    """
+    tags = ["#投資", "#資産運用", "#米国株", "#日本株", "#経済指標", "#相場note"]
+
+    if bls:
+        release_tag_map = {
+            "CUSR0000SA0": "#CPI",
+            "LNS14000000": "#雇用統計",
+            "CES0000000001": "#雇用統計",
+        }
+        for sid, data in bls.items():
+            if data.get("is_new_release"):
+                tag = release_tag_map.get(sid)
+                if tag and tag not in tags:
+                    tags.append(tag)
+
+    if fed and fed.get("new_items"):
+        tags.append("#FOMC")
+
+    return " ".join(tags)
+
+
 def build_article():
     fred = _latest_json("fred_indicators_*.json")
     bls = _latest_json("bls_indicators_*.json")
@@ -385,6 +414,10 @@ def build_article():
         build_us_pick_full(candidates_data, state) if candidates_data and state else "",
         build_fx_section(fx),
         build_glossary_section(PAID_AREA_TERMS, heading="## 📘 用語解説（有料エリアの用語）"),
+        "---",
+        "",
+        build_hashtags(fred, bls, fed),
+        "",
     ]
     return "\n".join(parts)
 
