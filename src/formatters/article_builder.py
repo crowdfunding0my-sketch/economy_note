@@ -291,20 +291,30 @@ def build_jp_pick_section():
     """
     rows, path = _latest_csv_rows("screening_result_*.csv")
     lines = ["## 本日の日本株ピックアップ（無料）", ""]
-    if not rows:
+    if rows is None:
         lines.append("（週次スクリーニング未実行のため、まだ候補がありません。"
                       "`python src/fetchers/jquants_screener.py` の実行後に反映されます）")
         lines.append("")
         return "\n".join(lines)
 
     scan_date = Path(path).stem.replace("screening_result_", "")
-    lines.append(f"（{scan_date} 実行のスクリーニング結果より。PER15倍以下・増収営業増益・"
-                  f"小型株・株価トレンド上昇を満たした銘柄）")
+    if not rows:
+        lines.append(f"（{scan_date} 実行のスクリーニング結果：条件に合致する銘柄はありませんでした）")
+        lines.append("")
+        return "\n".join(lines)
+
+    # 2026-09-07: PER15倍以下・増収営業増益3期連続という条件だと2169銘柄中0件だったため、
+    # 米国株の有料エリアと同じ「成長モメンタム株」基準（小型株＋直近期売上高成長＋株価トレンド
+    # 上昇、PER・黒字は不問）に変更した。表示もPERではなく売上高成長率を主役にしている。
+    lines.append(f"（{scan_date} 実行のスクリーニング結果より。小型株・直近期の売上高成長・"
+                  f"株価トレンド上昇を満たした銘柄。割安さ・黒字かどうかは問いません）")
     lines.append("")
     top_rows = sorted(rows, key=lambda r: float(r["price_change_rate"]), reverse=True)[:JP_PICKS_SHOWN]
     for r in top_rows:
+        per_text = f"PER {float(r['per']):.1f}倍" if r.get("per") else "PER算出不可（赤字）"
+        growth_text = f"売上高成長率 {float(r['revenue_growth_rate'])*100:+.1f}%" if r.get("revenue_growth_rate") else ""
         lines.append(
-            f"- **{r['code']}**：PER {float(r['per']):.1f}倍／株価{float(r['price']):,.0f}円／"
+            f"- **{r['code']}**：{growth_text}／{per_text}／株価{float(r['price']):,.0f}円／"
             f"過去の株価上昇率 {float(r['price_change_rate'])*100:+.1f}%"
         )
     lines.append("")

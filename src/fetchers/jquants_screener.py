@@ -1,16 +1,19 @@
 """
-J-Quants API V2 銘柄スクリーニングスクリプト（有料エリア「小型株特化」向け）
+J-Quants API V2 銘柄スクリーニングスクリプト（無料エリア「小型株ピックアップ」向け）
 
 条件（すべてAND）:
   1. 時価総額が SMALL_CAP_MAX_MKTCAP 以下（小型株）
-  2. 売上高・営業利益が直近N期(デフォルト3期)連続増加
+  2. 直近期の売上高が前期より増加
   3. 過去2年程度の株価が右肩上がり（回帰直線の傾き>0）かつ一貫性がある（決定係数R²が閾値以上）
 上記を満たす銘柄の中から、2年間の株価上昇率が高い順に上位15銘柄を抽出する。
 
-【2026-09-06 方針転換】当初はここにさらに「PER15倍以下」（割安）の条件も課していたが、
-米国株の有料エリア（1-3.参照）と同じく、割安×小型×連続増益×上昇トレンドを同時に満たす銘柄は
-ほぼ存在しないことが確認できたため、PER・黒字条件は判定から外し「成長モメンタム株」方式に
-統一した。EPS・PERは参考情報としてCSVには引き続き出力する（赤字の場合はNone）。
+【2026-09-06/07 方針転換】当初は「PER15倍以下」（割安）と「売上高・営業利益が3期連続増加」
+という、より厳しい条件だったが、米国株の有料エリア（1-3.参照）と同じく、割安×小型×連続増益×
+上昇トレンドを同時に満たす銘柄はほぼ存在しないことが確認できた（2169銘柄中0件）。
+そこでまずPER・黒字条件を撤廃したが、それでも0件だったため、増収の判定も「3期連続」から
+「直近1期のみ」に緩和し、米国株の有料エリアと完全に同じ基準（直近1期の売上高成長のみ、
+営業利益・複数期連続は問わない）に統一した。EPS・PERは参考情報としてCSVには引き続き
+出力する（赤字の場合はNone）。
 
 対象: グロース市場・スタンダード市場（小型株の比率が高いため。プライムは対象外）
 
@@ -91,7 +94,8 @@ HEADERS = {"x-api-key": API_KEY}
 
 # スクリーニング条件
 # MAX_PER（旧: 15.0倍以下）は2026-09-06に判定条件から撤廃（成長モメンタム方式への転換、詳細は上部docstring参照）
-CONSECUTIVE_GROWTH_YEARS = 3  # 直近何期分の増収増益を要求するか
+# CONSECUTIVE_GROWTH_YEARS（旧: 3期連続増収増益）も2026-09-07に撤廃。米国株の有料エリアと
+# 同じ基準（直近1期の売上高成長のみ、営業利益・複数期連続は問わない）に統一した（has_revenue_growth参照）。
 SMALL_CAP_MAX_MKTCAP = 50_000  # 時価総額の上限（百万円単位。J-QuantsのMktCapと同じ単位＝500億円）
 TREND_MIN_R2 = 0.3  # 株価トレンドの「一貫性」とみなす決定係数R²の下限（要調整の目安値）
 MIN_PRICE_POINTS = 200  # トレンド判定に必要な最低営業日数（目安：約10ヶ月分）
@@ -185,30 +189,33 @@ def get_price_history(code):
 
 
 def annual_records(financials):
-    """通期(FY)決算のレコードだけを抽出"""
+    """
+    通期(FY)決算のレコードだけを抽出。判定に使うのは売上高(Sales)のみのため、
+    OPの有無は絞り込み条件にしない（2026-09-07、営業利益の連続増加要件を撤廃したのに合わせて変更。
+    以前はOPが無いレコードを丸ごと除外していたが、Salesさえあれば判定に使えるため不要な除外だった）。
+    """
     return [
         r for r in financials
         if r.get("CurPerType") == "FY"
         and r.get("Sales") not in (None, "")
-        and r.get("OP") not in (None, "")
     ]
 
 
-def is_consecutive_growth(fy_records, years=CONSECUTIVE_GROWTH_YEARS):
-    """直近years期、売上高・営業利益が前期比で増加し続けているか判定"""
-    if len(fy_records) < years + 1:
+def has_revenue_growth(fy_records):
+    """
+    直近期の売上高が前期より増加しているか判定（2026-09-07変更）。
+    従来は「3期連続で売上高・営業利益がともに増加」という厳しい条件だったが、
+    PER・黒字条件を撤廃した後も全2,169銘柄でヒット0件だったため、米国株の
+    有料エリア（1-3参照）と完全に同じ基準に統一した：直近1期の売上高成長のみを見る
+    （営業利益の連続増加・複数期の連続性は問わない）。
+    """
+    if len(fy_records) < 2:
         return False
-    recent = fy_records[-(years + 1):]
-    for i in range(1, len(recent)):
-        prev, curr = recent[i - 1], recent[i]
-        try:
-            sales_growth = float(curr["Sales"]) > float(prev["Sales"])
-            op_growth = float(curr["OP"]) > float(prev["OP"])
-        except (TypeError, ValueError):
-            return False
-        if not (sales_growth and op_growth):
-            return False
-    return True
+    prev, curr = fy_records[-2], fy_records[-1]
+    try:
+        return float(curr["Sales"]) > float(prev["Sales"])
+    except (TypeError, ValueError):
+        return False
 
 
 def latest_eps(fy_records):
@@ -287,8 +294,9 @@ def _evaluate_code(code):
     financials = get_financial_summary(code)
     fy = annual_records(financials)
 
-    if not is_consecutive_growth(fy):
+    if not has_revenue_growth(fy):
         return None
+    revenue_growth_rate = round(float(fy[-1]["Sales"]) / float(fy[-2]["Sales"]) - 1, 4)
 
     # 2026-09-06: 米国株の「成長モメンタム株」方針転換と同じ考え方で、PER・黒字条件は
     # 判定条件から外した（割安×小型×連続増益×上昇トレンドを同時に満たす銘柄はほぼ存在しない
@@ -330,7 +338,7 @@ def _evaluate_code(code):
         "price_change_rate": round(price_change_rate, 4),
         "period_start": history[0].get("Date"),
         "period_end": latest.get("Date"),
-        "years_checked": CONSECUTIVE_GROWTH_YEARS,
+        "revenue_growth_rate": revenue_growth_rate,
     }
 
 
@@ -390,7 +398,7 @@ def save_results(hits, path=None):
     fieldnames = [
         "code", "price", "eps", "per", "mktcap_million_yen",
         "trend_slope", "trend_r2", "price_change_rate",
-        "period_start", "period_end", "years_checked",
+        "period_start", "period_end", "revenue_growth_rate",
     ]
     with open(path, "w", newline="", encoding="utf-8-sig") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -421,8 +429,8 @@ def _main():
 
     print(f"リクエスト間隔: {REQUEST_INTERVAL_SEC:.1f}秒（{REQUESTS_PER_MINUTE}req/分想定）")
     print(f"条件: 時価総額{SMALL_CAP_MAX_MKTCAP:,}百万円以下 / "
-          f"増収営業増益{CONSECUTIVE_GROWTH_YEARS}期連続 / "
-          f"株価トレンド右肩上がり(R2>={TREND_MIN_R2}) ※PER・黒字条件は不問（成長モメンタム方式）")
+          f"直近期の売上高成長 / "
+          f"株価トレンド右肩上がり(R2>={TREND_MIN_R2}) ※PER・黒字・営業利益・複数期連続は不問（成長モメンタム方式）")
     print(f"進捗は{PROGRESS_PATH}で随時確認できます。")
 
     all_hits = screen(codes, start_index=start_index, candidates=candidates_so_far,
