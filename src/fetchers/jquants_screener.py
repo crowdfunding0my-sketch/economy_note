@@ -106,8 +106,17 @@ PROGRESS_PATH = OUTPUT_DIR / "jquants_screening_progress.json"
 PROGRESS_UPDATE_EVERY = 5  # この件数ごとに進捗ファイルを更新（頻繁すぎるディスクI/Oを避ける）
 
 
+# ページネーションの安全上限（2026-09-06追加）。実機で、特定銘柄の処理中に
+# pagination_keyが終了せず（同じキーが返り続ける、または際限なく新しいキーが返り続ける）
+# 事実上の無限ループに陥り、14.5時間の全銘柄走査が最初の数銘柄から一歩も進まない不具合が
+# 複数回発生した。原因はAPI側の挙動まで特定できていないが、原因究明よりも「1銘柄が
+# どんな事情でも異常に長時間かからないようにする」ことを優先し、ページ数に上限を設けた。
+MAX_PAGINATION_PAGES = 30
+REQUEST_TIMEOUT_SEC = 30  # ネットワーク側がハングした場合に無限に待たないためのタイムアウト
+
+
 def _get(url, params=None):
-    resp = requests.get(url, headers=HEADERS, params=params)
+    resp = requests.get(url, headers=HEADERS, params=params, timeout=REQUEST_TIMEOUT_SEC)
     time.sleep(REQUEST_INTERVAL_SEC)
     return resp
 
@@ -126,13 +135,16 @@ def get_listed_equities(market_filters=None):
     return data
 
 
-def get_financial_summary(code):
-    """指定銘柄の財務情報サマリー(四半期・通期含む)を取得し、開示日昇順で返す"""
-    url = f"{BASE_URL}/v2/fins/summary"
+def _paginated_get(url, code, verbose=True):
+    """
+    codeをキーにページネーションしながら全件取得する共通処理。
+    MAX_PAGINATION_PAGESに達しても終わらない場合は、そこで打ち切って
+    それまでに取得できた分だけを返す（1銘柄のせいで全体が止まるのを防ぐ）。
+    """
     params = {"code": code}
     results = []
     pagination_key = None
-    while True:
+    for page in range(MAX_PAGINATION_PAGES):
         if pagination_key:
             params["pagination_key"] = pagination_key
         resp = _get(url, params)
@@ -143,6 +155,15 @@ def get_financial_summary(code):
         pagination_key = body.get("pagination_key")
         if not pagination_key:
             break
+    else:
+        if verbose:
+            print(f"[WARN] {code}: {url} が{MAX_PAGINATION_PAGES}ページ経っても終了しなかったため打ち切りました")
+    return results
+
+
+def get_financial_summary(code):
+    """指定銘柄の財務情報サマリー(四半期・通期含む)を取得し、開示日昇順で返す"""
+    results = _paginated_get(f"{BASE_URL}/v2/fins/summary", code)
     results.sort(key=lambda d: d.get("DiscDate", ""))
     return results
 
@@ -154,21 +175,7 @@ def get_price_history(code):
     「過去2年の株価推移で判定する」という設計とちょうど噛み合う）。
     日付昇順で返す。
     """
-    url = f"{BASE_URL}/v2/equities/bars/daily"
-    results = []
-    pagination_key = None
-    params = {"code": code}
-    while True:
-        if pagination_key:
-            params["pagination_key"] = pagination_key
-        resp = _get(url, params)
-        if resp.status_code != 200:
-            break
-        body = resp.json()
-        results.extend(body.get("data", []))
-        pagination_key = body.get("pagination_key")
-        if not pagination_key:
-            break
+    results = _paginated_get(f"{BASE_URL}/v2/equities/bars/daily", code)
     results.sort(key=lambda d: d.get("Date", ""))
     return results
 
@@ -252,6 +259,69 @@ def save_progress(processed, total, hits_so_far, last_code, started_at):
         }, f, ensure_ascii=False, indent=2)
 
 
+def _evaluate_code(code):
+    """
+    1銘柄分の判定処理。条件を満たさなければNoneを返す（screen()側のループでは
+    continueを使わず、必ずreturnで抜けるようにしている。これは2026-09-06に見つかった
+    重大な不具合の修正のため：以前はこの判定を screen() のforループ本体に直接書いており、
+    条件不一致による`continue`が、その下にあるチェックポイント保存処理まで丸ごと
+    読み飛ばしてしまっていた。増収増益・PER・トレンドの条件は非常に厳しく、
+    ほぼ全銘柄が`continue`する（＝ヒットする銘柄の方が稀）ため、結果として
+    チェックポイントが実質一度も保存されない状態になっていた。全銘柄走査が
+    14.5時間×複数回、一度も完走せず、かつ再開もできないまま無駄になっていた
+    原因はこれだった。判定ロジックを別関数に分離し、returnで抜けても呼び出し元の
+    ループ（チェックポイント保存を含む）には影響しない構造にした。
+    """
+    financials = get_financial_summary(code)
+    fy = annual_records(financials)
+
+    if not is_consecutive_growth(fy):
+        return None
+
+    eps = latest_eps(fy)
+    if not eps or eps <= 0:
+        return None
+
+    history = get_price_history(code)
+    if len(history) < MIN_PRICE_POINTS:
+        return None
+
+    latest = history[-1]
+    price = latest.get("C")
+    mktcap = latest.get("MktCap")
+    if not price or not mktcap:
+        return None
+
+    if mktcap > SMALL_CAP_MAX_MKTCAP:
+        return None
+
+    per = price / eps
+    if per > MAX_PER:
+        return None
+
+    closes = [h["C"] for h in history if h.get("C") is not None]
+    slope, r_squared = linear_trend(closes)
+    if slope <= 0 or r_squared < TREND_MIN_R2:
+        return None
+
+    first_price = closes[0]
+    price_change_rate = (price - first_price) / first_price
+
+    return {
+        "code": code,
+        "price": price,
+        "eps": round(eps, 2),
+        "per": round(per, 2),
+        "mktcap_million_yen": mktcap,
+        "trend_slope": round(slope, 4),
+        "trend_r2": round(r_squared, 3),
+        "price_change_rate": round(price_change_rate, 4),
+        "period_start": history[0].get("Date"),
+        "period_end": latest.get("Date"),
+        "years_checked": CONSECUTIVE_GROWTH_YEARS,
+    }
+
+
 def screen(codes, start_index=0, candidates=None, overall_started_at=None, verbose=True):
     """
     スクリーニングを実行し、条件（小型株・増収増益・PER15以下・株価が右肩上がり）を
@@ -271,69 +341,29 @@ def screen(codes, start_index=0, candidates=None, overall_started_at=None, verbo
 
     for i in range(start_index, total):
         code = codes[i]
+        if verbose and i % PROGRESS_UPDATE_EVERY == 0:
+            # 銘柄ごとの処理に想定外に時間がかかった場合、どの銘柄で発生したか特定できるよう、
+            # 開始時点でも(完了を待たず)出力する(2026-09-06追加、print後は即flushする)
+            print(f"  -> 処理開始: {code} ({i + 1}/{total})", flush=True)
         try:
-            financials = get_financial_summary(code)
-            fy = annual_records(financials)
-
-            if not is_consecutive_growth(fy):
-                continue
-
-            eps = latest_eps(fy)
-            if not eps or eps <= 0:
-                continue
-
-            history = get_price_history(code)
-            if len(history) < MIN_PRICE_POINTS:
-                continue
-
-            latest = history[-1]
-            price = latest.get("C")
-            mktcap = latest.get("MktCap")
-            if not price or not mktcap:
-                continue
-
-            if mktcap > SMALL_CAP_MAX_MKTCAP:
-                continue
-
-            per = price / eps
-            if per > MAX_PER:
-                continue
-
-            closes = [h["C"] for h in history if h.get("C") is not None]
-            slope, r_squared = linear_trend(closes)
-            if slope <= 0 or r_squared < TREND_MIN_R2:
-                continue
-
-            first_price = closes[0]
-            price_change_rate = (price - first_price) / first_price
-
-            candidates.append({
-                "code": code,
-                "price": price,
-                "eps": round(eps, 2),
-                "per": round(per, 2),
-                "mktcap_million_yen": mktcap,
-                "trend_slope": round(slope, 4),
-                "trend_r2": round(r_squared, 3),
-                "price_change_rate": round(price_change_rate, 4),
-                "period_start": history[0].get("Date"),
-                "period_end": latest.get("Date"),
-                "years_checked": CONSECUTIVE_GROWTH_YEARS,
-            })
-            if verbose:
-                print(f"[HIT] {code}  PER={per:.1f}  price={price}  "
-                      f"上昇率={price_change_rate:.1%}  R2={r_squared:.2f}")
-
+            hit = _evaluate_code(code)
+            if hit:
+                candidates.append(hit)
+                if verbose:
+                    print(f"[HIT] {code}  PER={hit['per']:.1f}  price={hit['price']}  "
+                          f"上昇率={hit['price_change_rate']:.1%}  R2={hit['trend_r2']:.2f}")
         except Exception as e:
             if verbose:
                 print(f"[ERROR] {code}: {e}")
 
+        # 上のtry/exceptでcontinueを一切使っていないため、この後の処理は
+        # 銘柄の判定結果に関わらず必ず実行される（2026-09-06の不具合修正の要点）
         processed = i + 1
         if processed % PROGRESS_UPDATE_EVERY == 0 or processed == total:
             save_checkpoint(codes, processed, candidates, overall_started_at)
             save_progress(processed, total, len(candidates), code, session_started_at)
             if verbose:
-                print(f"...{processed}/{total} 銘柄処理済み（ヒット{len(candidates)}件）")
+                print(f"...{processed}/{total} 銘柄処理済み（ヒット{len(candidates)}件）", flush=True)
 
     candidates.sort(key=lambda h: h["price_change_rate"], reverse=True)
     return candidates
