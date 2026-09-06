@@ -17,12 +17,21 @@
 """
 
 import os
+import re
+import sys
 import json
+import time
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import requests
 from dotenv import load_dotenv
+from deep_translator import GoogleTranslator
+
+# 下書きファイル名・ローテーション記録はarticle_builder.pyが読みに来る日付と一致させる必要があるため、
+# 読者の生活時間である日本時間(JST)基準にする（UTC基準だとJST朝の実行時に前日扱いになってしまう）。
+JST = ZoneInfo("Asia/Tokyo")
 
 load_dotenv()
 
@@ -57,7 +66,7 @@ def pick_todays_stock(candidates, state):
     stock = candidates[index]
     state["next_index"] = (index + 1) % len(candidates)
     state["last_picked_symbol"] = stock["symbol"]
-    state["last_picked_date"] = datetime.now(timezone.utc).date().isoformat()
+    state["last_picked_date"] = datetime.now(JST).date().isoformat()
     return stock
 
 
@@ -77,7 +86,138 @@ def fetch_news(symbol, limit=5):
     return body.get("feed", [])[:limit]
 
 
-def format_draft(stock, news_items):
+def fetch_overview(symbol, retries=1, retry_wait_sec=20):
+    """Alpha VantageのOVERVIEWでアナリスト目標株価・レーティング・予想PER等を取得（「今後の展望」の元データ）。
+    レート制限（5リクエスト/分）に引っかかった場合はNote/Informationキー付きのJSONが返るだけで
+    HTTPエラーにはならないため、"Symbol"キーの有無で成否を判定し、失敗時は少し待って1回だけ再試行する。"""
+    if not ALPHAVANTAGE_API_KEY:
+        return {}
+    for attempt in range(retries + 1):
+        resp = requests.get(ALPHAVANTAGE_URL, params={
+            "function": "OVERVIEW",
+            "symbol": symbol,
+            "apikey": ALPHAVANTAGE_API_KEY,
+        })
+        resp.raise_for_status()
+        body = resp.json()
+        if body.get("Symbol"):
+            return body
+        if attempt < retries:
+            time.sleep(retry_wait_sec)
+    return {}
+
+
+def _to_float(value):
+    """Alpha Vantageは未提供の値を"-"や"None"の文字列で返すことがあるため、それらをNoneに正規化する"""
+    try:
+        if value in (None, "", "-", "None"):
+            return None
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def build_outlook(stock, overview):
+    """アナリスト予想・レーティング（Alpha Vantage OVERVIEW）をもとに「今後の展望」を組み立てる。
+    文章はAIが書くのではなく、取得した数値をそのまま構成している。"""
+    lines = []
+
+    target = _to_float(overview.get("AnalystTargetPrice"))
+    latest_close = stock.get("latest_close")
+    if target and latest_close:
+        upside_pct = (target / latest_close - 1) * 100
+        lines.append(f"- アナリスト目標株価：{target:,.2f}ドル（現在値 {latest_close:,.2f}ドルから{upside_pct:+.1f}%）")
+
+    ratings = [
+        ("強気買い", _to_float(overview.get("AnalystRatingStrongBuy"))),
+        ("買い", _to_float(overview.get("AnalystRatingBuy"))),
+        ("中立", _to_float(overview.get("AnalystRatingHold"))),
+        ("売り", _to_float(overview.get("AnalystRatingSell"))),
+        ("強気売り", _to_float(overview.get("AnalystRatingStrongSell"))),
+    ]
+    if any(v for _, v in ratings):
+        rating_text = "・".join(f"{label}{int(v)}" for label, v in ratings if v)
+        lines.append(f"- アナリスト評価：{rating_text}")
+
+    forward_pe = _to_float(overview.get("ForwardPE"))
+    trailing_pe = _to_float(overview.get("TrailingPE"))
+    if forward_pe:
+        pe_text = f"- 予想PER：{forward_pe:.1f}倍"
+        if trailing_pe:
+            pe_text += f"（実績PER {trailing_pe:.1f}倍）"
+        lines.append(pe_text)
+
+    rev_growth = _to_float(overview.get("QuarterlyRevenueGrowthYOY"))
+    earn_growth = _to_float(overview.get("QuarterlyEarningsGrowthYOY"))
+    if rev_growth is not None:
+        growth_text = f"- 直近四半期の売上成長率（前年比）：{rev_growth*100:+.1f}%"
+        if earn_growth is not None:
+            growth_text += f"、利益成長率（前年比）：{earn_growth*100:+.1f}%"
+        lines.append(growth_text)
+
+    if not lines:
+        return "アナリストによる予想データが取得できませんでした（カバレッジ対象外の可能性があります）。"
+
+    lines.append("")
+    lines.append("> アナリスト予想はAlpha Vantageが集計した市場コンセンサスで、カバレッジの薄い銘柄では件数が少なく参考程度になる場合があります。")
+    return "\n".join(lines)
+
+
+def _trim_description(text, target_len=200):
+    """Alpha VantageのDescriptionは、後半に「業界のリーダーとしての地位を確立」のような
+    定型的な誇張表現（PR文）が続くことが多く、機械翻訳するとその部分が特に不自然になりやすい。
+    target_len文字以降で最初に来る文の区切り（". "）までを採用し、末尾の誇張表現を落とす。"""
+    if not text:
+        return text
+    boundaries = [m.end() for m in re.finditer(r"\. ", text)]
+    cutoff = next((b for b in boundaries if b >= target_len), None)
+    if cutoff is None:
+        return text
+    return text[:cutoff].rstrip()
+
+
+def translate_to_japanese(text):
+    """deep-translator（Google翻訳の無料・非公式エンドポイント経由）で英語テキストを日本語に翻訳する。
+    非公式APIのため失敗しうる前提でNoneを返し、呼び出し側で原文（英語）にフォールバックする。"""
+    if not text:
+        return None
+    try:
+        return GoogleTranslator(source="en", target="ja").translate(text)
+    except Exception:
+        return None
+
+
+def build_business_section(overview):
+    """Alpha Vantage OVERVIEWのSector/Industry/Descriptionから「事業内容」セクションを組み立てる。
+    翻訳に失敗した場合は英語原文をそのまま表示する。"""
+    sector = overview.get("Sector")
+    industry = overview.get("Industry")
+    description = overview.get("Description")
+    if not (sector or industry or description):
+        return None
+
+    lines = ["**事業内容**", ""]
+
+    field_en = " / ".join(p for p in [sector, industry] if p)
+    if field_en:
+        field_ja = translate_to_japanese(field_en)
+        lines.append(f"- 分野：{field_ja or field_en}")
+        lines.append("")
+
+    if description:
+        description = _trim_description(description)
+        desc_ja = translate_to_japanese(description)
+        lines.append(desc_ja or description)
+        lines.append("")
+        if desc_ja:
+            lines.append("> 事業内容はAlpha Vantageの英語情報を機械翻訳したものです。ニュアンスが原文と異なる場合があります。")
+        else:
+            lines.append("> 翻訳に失敗したため、Alpha Vantageの英語原文をそのまま表示しています。")
+
+    return "\n".join(lines)
+
+
+def format_draft(stock, news_items, overview):
     symbol = stock["symbol"]
     growth_pct = stock["revenue_growth_rate"] * 100
     price_change_pct = stock["price_change_rate_2y"] * 100
@@ -86,6 +226,13 @@ def format_draft(stock, news_items):
     lines = [
         f"### {symbol}（{stock.get('company_hint', '')}）",
         "",
+    ]
+
+    business_section = build_business_section(overview)
+    if business_section:
+        lines += [business_section, ""]
+
+    lines += [
         "**直近決算**",
         "",
         f"- 売上高：{stock['revenue_curr']:,.0f}ドル（前期 {stock['revenue_prev']:,.0f}ドル、{growth_pct:+.1f}%）",
@@ -113,10 +260,46 @@ def format_draft(stock, news_items):
         "",
         "**今後の展望**",
         "",
-        "（直近決算・ニュースを踏まえたコメントをここに追記）",
+        build_outlook(stock, overview),
         "",
     ]
     return "\n".join(lines)
+
+
+def _build_and_save_draft(stock, verbose=True):
+    if verbose:
+        print(f"本日の銘柄: {stock['symbol']}")
+    news_items = fetch_news(stock["symbol"])
+    if verbose:
+        print(f"取得ニュース件数: {len(news_items)}")
+    overview = fetch_overview(stock["symbol"])
+    if verbose and not overview.get("Symbol"):
+        print("警告: アナリスト予想データを取得できませんでした（レート制限、または本当にカバレッジ対象外の可能性）")
+
+    draft = format_draft(stock, news_items, overview)
+
+    DRAFT_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = DRAFT_DIR / f"us_pick_{datetime.now(JST).strftime('%Y%m%d')}.md"
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(draft)
+    return out_path
+
+
+def retry_today(verbose=True):
+    """本日すでに選定済みの銘柄について、下書きだけを再生成する（ローテーションは進めない）。
+    「今後の展望」がフォールバック文言になった際の手動リカバリー用。"""
+    candidates = load_candidates()
+    state = load_state()
+    symbol = state.get("last_picked_symbol")
+    if not symbol:
+        raise RuntimeError("本日選定済みの銘柄がありません（先にrun()を実行してください）")
+    stock = next((c for c in candidates if c["symbol"] == symbol), None)
+    if stock is None:
+        raise RuntimeError(f"候補リストに{symbol}が見つかりません")
+    out_path = _build_and_save_draft(stock, verbose=verbose)
+    if verbose:
+        print(f"下書きを再生成しました（ローテーションは変更なし）: {out_path}")
+    return stock, out_path
 
 
 def run(verbose=True):
@@ -124,25 +307,17 @@ def run(verbose=True):
     state = load_state()
     stock = pick_todays_stock(candidates, state)
 
-    if verbose:
-        print(f"本日の銘柄: {stock['symbol']}")
-    news_items = fetch_news(stock["symbol"])
-    if verbose:
-        print(f"取得ニュース件数: {len(news_items)}")
-
-    draft = format_draft(stock, news_items)
-
-    DRAFT_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = DRAFT_DIR / f"us_pick_{datetime.now(timezone.utc).strftime('%Y%m%d')}.md"
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write(draft)
+    out_path = _build_and_save_draft(stock, verbose=verbose)
 
     save_state(state)
     if verbose:
         print(f"下書きを保存しました: {out_path}")
+        print(f"次回のローテーション位置: {state['next_index']} / {len(candidates)}")
     return stock, out_path
 
 
 if __name__ == "__main__":
-    run()
-    print(f"次回のローテーション位置: {state['next_index']} / {len(candidates)}")
+    if "--retry" in sys.argv:
+        retry_today()
+    else:
+        run()

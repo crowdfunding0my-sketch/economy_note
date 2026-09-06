@@ -14,10 +14,14 @@ import json
 import glob
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import textwrap
 
 from PIL import Image, ImageDraw, ImageFont
+
+# ファイル名は同じ日の記事・サムネイルと一致させる必要があるため、日本時間(JST)基準にする。
+JST = ZoneInfo("Asia/Tokyo")
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_DIR = PROJECT_ROOT / "output"
@@ -105,7 +109,8 @@ def build_table_image(out_path=None):
     pad = 30
 
     caption = ("出典：FRED（セントルイス連銀）。*正式なPMIは無料取得不可のため地区連銀の製造業"
-               "サーベイを代替掲載（0が拡大/縮小の境目）。指標発表当日はBLSの速報値を優先。")
+               "サーベイを代替掲載（0が拡大/縮小の境目）。指標発表当日はBLSの速報値を優先。"
+               "指標ごとに発表タイミングが異なるため、「最新値」の対象月は指標間でずれることがあります。")
     font_caption = _font(FONT_MEDIUM, 20)
     caption_wrap_width = 60  # 半角換算のおおよその折り返し文字数
     caption_lines = textwrap.wrap(caption, width=caption_wrap_width)
@@ -161,7 +166,7 @@ def build_table_image(out_path=None):
     if not out_path:
         out_dir = OUTPUT_DIR / "tables"
         out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = out_dir / f"indicators_table_{datetime.now(timezone.utc).strftime('%Y%m%d')}.png"
+        out_path = out_dir / f"indicators_table_{datetime.now(JST).strftime('%Y%m%d')}.png"
     img.save(out_path)
     return out_path
 

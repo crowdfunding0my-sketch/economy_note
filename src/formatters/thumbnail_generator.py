@@ -24,10 +24,15 @@ import random
 from io import BytesIO
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import requests
 from dotenv import load_dotenv
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
+
+# サムネイル上に表示する日付・ファイル名は記事側(article_builder.py)と一致させる必要があるため、
+# 読者の生活時間である日本時間(JST)基準にする。
+JST = ZoneInfo("Asia/Tokyo")
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT / "src" / "fetchers"))
@@ -123,10 +128,16 @@ def fit_and_crop(img, target_w, target_h):
     return img.crop((left, top, left + target_w, top + target_h))
 
 
-def darken_for_text(img, opacity=175):
+def darken_for_text(img, opacity=195):
     """写真の上に黒の半透明レイヤーを重ね、テキストを読みやすくする"""
     overlay = Image.new("RGBA", img.size, (10, 12, 20, opacity))
     return Image.alpha_composite(img.convert("RGBA"), overlay).convert("RGB")
+
+
+def desaturate(img, factor=0.35):
+    """彩度を落とし、企業カラー・ロゴの色味を目立たなくする"""
+    gray = img.convert("L").convert("RGB")
+    return Image.blend(img, gray, 1 - factor)
 
 
 def fetch_stock_price_history(symbol, lookback_days=760):
@@ -190,7 +201,7 @@ def build_text_layer(featured, sp500_summary):
     draw = ImageDraw.Draw(layer)
 
     draw.text((90, 75), "相場note", font=_font(FONT_BOLD, 60), fill=COLOR_TEXT)
-    today = datetime.now(timezone.utc).strftime("%Y/%m/%d")
+    today = datetime.now(JST).strftime("%Y/%m/%d")
     draw.text((90, 190), today, font=_font(FONT_BOLD, 110), fill=COLOR_TEXT)
 
     if featured:
@@ -236,8 +247,9 @@ def build_thumbnail(out_path=None):
 
     if photo:
         base = fit_and_crop(photo, WIDTH, HEIGHT)
+        base = base.filter(ImageFilter.GaussianBlur(14))  # ロゴ・アプリ画面等の判別を防ぐため強めにぼかす
+        base = desaturate(base)
         base = darken_for_text(base)
-        base = base.filter(ImageFilter.GaussianBlur(1))  # 軽くぼかして文字を読みやすく
     else:
         # フォールバック：写真が用意できない場合はグラデーション＋スパークライン
         base = Image.new("RGB", (WIDTH, HEIGHT), COLOR_BG_TOP)
@@ -264,7 +276,7 @@ def build_thumbnail(out_path=None):
     if not out_path:
         out_dir = OUTPUT_DIR / "thumbnails"
         out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = out_dir / f"thumbnail_{datetime.now(timezone.utc).strftime('%Y%m%d')}.png"
+        out_path = out_dir / f"thumbnail_{datetime.now(JST).strftime('%Y%m%d')}.png"
     final_img.save(out_path)
     return out_path
 

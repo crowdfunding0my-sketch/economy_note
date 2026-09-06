@@ -23,17 +23,27 @@
   - noteへの実際の投稿：note.comに公式APIが無いため、生成された下書き（output/article_draft_*.md）
     を人がコピー＆ペーストして投稿する
 
+【休場日のスキップ（2026-09-05：前日基準に変更）】
+FREDの株価データ遅延により、当日の記事は実質「前日に終値がついたセッション」を報じる。
+そのため「前日が日米とも休場だったか」でスキップ判定する（当日ではない）。
+例：土曜は金曜の終値を報じるので生成する。月曜は前日(日曜)が休場で金曜と同じ終値しか
+無いためスキップする（土曜の記事と重複するため）。火曜は月曜の終値を報じるので生成する。
+判定は src/fetchers/market_calendar.py の should_skip_generation()
+（米国はAlpaca取引カレンダーAPI、日本はjpholiday）。
+
 使い方:
   python src/main.py
 """
 
 import sys
+from datetime import date
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src" / "fetchers"))
 sys.path.insert(0, str(PROJECT_ROOT / "src" / "formatters"))
 
+import market_calendar
 import fred_indicators
 import bls_indicators
 import fed_press_releases
@@ -45,6 +55,11 @@ import thumbnail_generator
 
 
 def main():
+    today = date.today()
+    if market_calendar.should_skip_generation(today):
+        print(f"{today} は前日が日米ともに市場休場日で新しい終値情報が無いため、記事生成をスキップします。")
+        return
+
     print("=== 1/8 FRED経済指標を取得 ===")
     fred_indicators.run()
 
@@ -64,8 +79,9 @@ def main():
     article = article_builder.build_article()
     out_dir = PROJECT_ROOT / "output"
     out_dir.mkdir(exist_ok=True)
-    from datetime import datetime, timezone
-    out_path = out_dir / f"article_draft_{datetime.now(timezone.utc).strftime('%Y%m%d')}.md"
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    out_path = out_dir / f"article_draft_{datetime.now(ZoneInfo('Asia/Tokyo')).strftime('%Y%m%d')}.md"
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(article)
     print(f"記事下書きを保存しました: {out_path}")

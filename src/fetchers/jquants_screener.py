@@ -28,11 +28,24 @@ J-Quants API V2 銘柄スクリーニングスクリプト（有料エリア「�
 使い方:
   1. .env に JQUANTS_API_KEY をセット
   2. python src/fetchers/jquants_screener.py
+
+【進捗の可視化・チェックポイント再開（2026-09-01追加）】
+全銘柄走査に14.5時間程度かかる想定だったが、実機では24時間経っても完走しないことがあり、
+かつ完走するまで結果を一切保存しない作りだったため、「本当に進んでいるのか」を外から確認できず、
+途中で止めると最初からやり直しになる問題があった。対応として:
+- `output/jquants_screening_progress.json`に処理件数・直近コード・推定残り時間を随時書き出す
+  （`cat`等でいつでも進捗確認できる）。
+- `output/jquants_screening_checkpoint.json`に処理済みコードと途中経過のヒットを随時保存し、
+  中断後の再実行時はそこから再開する（銘柄一覧の再取得はしない＝APIリクエストを無駄にしない）。
+  正常完走した場合はチェックポイントを削除し、次回は新規スキャンとして開始する。
 """
 
 import os
+import sys
+import json
 import time
 import csv
+import traceback
 import requests
 from datetime import datetime
 from pathlib import Path
@@ -42,6 +55,30 @@ from dotenv import load_dotenv
 from trend_utils import linear_trend
 
 load_dotenv()
+
+# Windowsのコンソール既定コードページ(cp932)だと銘柄名等の一部文字でprint()が落ちることがあるため、
+# UTF-8に強制する（fed_press_releases.pyと同じ対策）。タスクスケジューラ経由の非対話実行では
+# stdoutがreconfigure()に対応しない環境になりうるため、失敗してもスクリプト全体を落とさないよう
+# try/exceptで囲む（2026-09-06追加：この行が原因かは未確認だが、原因不明のままクラッシュする
+# 不具合が実機で発生したため、疑わしい箇所は防御的にしておく）。
+try:
+    if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+ERROR_LOG_PATH = PROJECT_ROOT / "output" / "jquants_screening_error.log"
+
+
+def _log_fatal_error():
+    """タスクスケジューラ経由の実行はstdoutがどこにも残らないため、致命的なエラーが起きた場合は
+    トレースバックをファイルに書き残す（2026-09-06追加：原因不明のクラッシュが実機で発生し、
+    調査しようにも手がかりが全く残っていなかったため）。"""
+    ERROR_LOG_PATH.parent.mkdir(exist_ok=True)
+    with open(ERROR_LOG_PATH, "a", encoding="utf-8") as f:
+        f.write(f"\n=== {datetime.now().isoformat(timespec='seconds')} ===\n")
+        f.write(traceback.format_exc())
 
 BASE_URL = "https://api.jquants.com"
 API_KEY = os.environ.get("JQUANTS_API_KEY", "")
@@ -63,7 +100,10 @@ REQUEST_INTERVAL_SEC = 60.0 / REQUESTS_PER_MINUTE
 # 小型株の比率が高い市場区分（プライムは大型株中心のため対象外）
 TARGET_MARKETS = ["グロース", "スタンダード"]
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+OUTPUT_DIR = PROJECT_ROOT / "output"
+CHECKPOINT_PATH = OUTPUT_DIR / "jquants_screening_checkpoint.json"
+PROGRESS_PATH = OUTPUT_DIR / "jquants_screening_progress.json"
+PROGRESS_UPDATE_EVERY = 5  # この件数ごとに進捗ファイルを更新（頻繁すぎるディスクI/Oを避ける）
 
 
 def _get(url, params=None):
@@ -172,13 +212,65 @@ def latest_eps(fy_records):
     return None
 
 
-def screen(codes, verbose=True):
+def load_checkpoint():
+    if CHECKPOINT_PATH.exists():
+        with open(CHECKPOINT_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    return None
+
+
+def save_checkpoint(codes, next_index, candidates, started_at):
+    OUTPUT_DIR.mkdir(exist_ok=True)
+    with open(CHECKPOINT_PATH, "w", encoding="utf-8") as f:
+        json.dump({
+            "codes": codes,
+            "next_index": next_index,
+            "candidates": candidates,
+            "started_at": started_at,
+        }, f, ensure_ascii=False)
+
+
+def clear_checkpoint():
+    if CHECKPOINT_PATH.exists():
+        CHECKPOINT_PATH.unlink()
+
+
+def save_progress(processed, total, hits_so_far, last_code, started_at):
+    elapsed = time.monotonic() - started_at
+    remaining = total - processed
+    eta_sec = remaining * (elapsed / processed) if processed else None
+    OUTPUT_DIR.mkdir(exist_ok=True)
+    with open(PROGRESS_PATH, "w", encoding="utf-8") as f:
+        json.dump({
+            "processed": processed,
+            "total": total,
+            "hits_so_far": hits_so_far,
+            "last_code": last_code,
+            "updated_at": datetime.now().isoformat(timespec="seconds"),
+            "elapsed_minutes": round(elapsed / 60, 1),
+            "estimated_remaining_minutes": round(eta_sec / 60, 1) if eta_sec is not None else None,
+        }, f, ensure_ascii=False, indent=2)
+
+
+def screen(codes, start_index=0, candidates=None, overall_started_at=None, verbose=True):
     """
     スクリーニングを実行し、条件（小型株・増収増益・PER15以下・株価が右肩上がり）を
-    すべて満たす銘柄を、2年間の株価上昇率が高い順に並べて返す（上位TOP_N件）。
+    すべて満たす銘柄を、2年間の株価上昇率が高い順に並べて返す（TOP_N絞り込みは呼び出し側で行う）。
+
+    途中中断からの再開に対応するため、start_index（前回処理済みの続きから開始する位置）と
+    candidates（前回までに見つかった全ヒット、TOP_N絞り込み前）を受け取れるようにしている。
+    overall_started_at はチェックポイントに記録する「初回開始時刻」（再開しても変わらない、
+    人が読むための記録用）。ETA計算にはこの関数呼び出し時点からの実測ペース（time.monotonic）を使う
+    （中断・再開をまたぐと計測が途切れるため、直近のペースの方が実態に近いと判断）。
+    処理中は一定件数ごとにチェックポイント・進捗ファイルを更新する。
     """
-    candidates = []
-    for i, code in enumerate(codes):
+    candidates = list(candidates) if candidates else []
+    overall_started_at = overall_started_at or datetime.now().isoformat(timespec="seconds")
+    session_started_at = time.monotonic()
+    total = len(codes)
+
+    for i in range(start_index, total):
+        code = codes[i]
         try:
             financials = get_financial_summary(code)
             fy = annual_records(financials)
@@ -236,11 +328,15 @@ def screen(codes, verbose=True):
             if verbose:
                 print(f"[ERROR] {code}: {e}")
 
-        if verbose and (i + 1) % 50 == 0:
-            print(f"...{i + 1}/{len(codes)} 銘柄処理済み")
+        processed = i + 1
+        if processed % PROGRESS_UPDATE_EVERY == 0 or processed == total:
+            save_checkpoint(codes, processed, candidates, overall_started_at)
+            save_progress(processed, total, len(candidates), code, session_started_at)
+            if verbose:
+                print(f"...{processed}/{total} 銘柄処理済み（ヒット{len(candidates)}件）")
 
     candidates.sort(key=lambda h: h["price_change_rate"], reverse=True)
-    return candidates[:TOP_N]
+    return candidates
 
 
 def save_results(hits, path=None):
@@ -260,20 +356,49 @@ def save_results(hits, path=None):
     return path
 
 
-if __name__ == "__main__":
+def _main():
     if not API_KEY:
         raise SystemExit(".env に JQUANTS_API_KEY を設定してください")
 
-    equities = get_listed_equities(market_filters=TARGET_MARKETS)
-    codes = [e["Code"] for e in equities]
+    checkpoint = load_checkpoint()
+    if checkpoint:
+        codes = checkpoint["codes"]
+        start_index = checkpoint["next_index"]
+        candidates_so_far = checkpoint["candidates"]
+        overall_started_at = checkpoint["started_at"]
+        print(f"前回の中断分を検知: {start_index}/{len(codes)} 銘柄まで処理済み"
+              f"（開始: {overall_started_at}）。続きから再開します。")
+    else:
+        equities = get_listed_equities(market_filters=TARGET_MARKETS)
+        codes = [e["Code"] for e in equities]
+        start_index = 0
+        candidates_so_far = []
+        overall_started_at = None
+        print(f"対象銘柄数: {len(codes)}（{'/'.join(TARGET_MARKETS)}）")
 
-    print(f"対象銘柄数: {len(codes)}（{'/'.join(TARGET_MARKETS)}）")
     print(f"リクエスト間隔: {REQUEST_INTERVAL_SEC:.1f}秒（{REQUESTS_PER_MINUTE}req/分想定）")
     print(f"条件: 時価総額{SMALL_CAP_MAX_MKTCAP:,}百万円以下 / "
           f"増収営業増益{CONSECUTIVE_GROWTH_YEARS}期連続 / PER{MAX_PER}倍以下 / "
           f"株価トレンド右肩上がり(R2>={TREND_MIN_R2})")
-    results = screen(codes)
+    print(f"進捗は{PROGRESS_PATH}で随時確認できます。")
 
-    print(f"\n条件合致銘柄数（上位{TOP_N}件抽出後）: {len(results)}")
+    all_hits = screen(codes, start_index=start_index, candidates=candidates_so_far,
+                       overall_started_at=overall_started_at)
+    results = all_hits[:TOP_N]
+
+    print(f"\n条件合致銘柄数（全{len(all_hits)}件中、上位{TOP_N}件抽出後）: {len(results)}")
     out_path = save_results(results)
     print(f"結果を保存しました: {out_path}")
+
+    clear_checkpoint()
+    if PROGRESS_PATH.exists():
+        PROGRESS_PATH.unlink()
+    print("完走したためチェックポイント・進捗ファイルを削除しました。")
+
+
+if __name__ == "__main__":
+    try:
+        _main()
+    except Exception:
+        _log_fatal_error()
+        raise

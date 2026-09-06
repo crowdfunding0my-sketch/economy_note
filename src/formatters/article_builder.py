@@ -23,15 +23,22 @@ import json
 import glob
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_DIR = PROJECT_ROOT / "output"
 
+# 記事のタイトル・ファイル名・日次ローテーション判定はすべて読者の生活時間である日本時間(JST)基準にする。
+# UTC基準だとJST 0:00〜8:59の実行時に「前日」扱いになってしまい、朝7時運用と噛み合わないため。
+JST = ZoneInfo("Asia/Tokyo")
+
 JP_PICKS_SHOWN = 3  # 日本株ピックアップで本文に載せる件数
 
 # 投資初心者向けの用語解説。外部リンクではなく記事内で完結させる方針（note.comは
-# サイドバー的なレイアウトを作れないため）。各セクションで使う用語をあらかじめ紐付けておき、
-# 「用語解説」セクションとして自動生成する。
+# サイドバー的なレイアウトを作れないため）。以前は無料/有料エリアそれぞれ固定の複数用語を
+# 毎日同じ内容で表示していたが、「経済用語全体から毎日1つ」に変更（2026-08-28）。
+# 定義の裏取りは日本銀行「教えて!にちぎん」・JPX/JSDAの投資用語集・J-FLECの解説等を参考にしつつ、
+# 転載ではなく自前の平易な言い回しで書いている。
 GLOSSARY = {
     "CPI": "消費者物価指数。モノやサービスの値段が全体としてどれくらい上がった/下がったかを示す、物価の「体温計」のような指標。",
     "コアCPI": "CPIから、値動きの大きい食品・エネルギーを除いた指標。物価の基調的な動きを見るのに使われる。",
@@ -49,14 +56,52 @@ GLOSSARY = {
     "ドルインデックス": "ドルが主要な複数通貨に対して全体としてどれくらい強い/弱いかを示す指数。",
     "レバレッジド・マネー": "ヘッジファンドなど、借入等を活用して積極的に売買する投資家層を指すCFTC（米商品先物取引委員会）の分類。",
     "ネットポジション": "買い建玉（買いの契約数）から売り建玉（売りの契約数）を差し引いた数。プラスなら買い越し、マイナスなら売り越し。",
+    "インフレ": "モノやサービスの値段が全体的に上がり続けること。同じ金額で買えるものが少しずつ減っていく。",
+    "デフレ": "モノやサービスの値段が全体的に下がり続けること。一見お得だが、企業の利益や賃金も下がりやすく、"
+             "景気の停滞につながることがある。",
+    "金融緩和": "中央銀行が金利を下げたり資金供給を増やしたりして、お金を借りやすくする政策。景気を刺激する狙いがある。",
+    "金融引き締め": "中央銀行が金利を上げたり資金供給を減らしたりして、お金の流れを抑える政策。"
+                  "過熱した景気やインフレを抑える狙いがある。",
+    "政策金利": "中央銀行が金融機関との取引に適用する基準となる金利。景気や物価をコントロールするための代表的な手段。",
+    "量的緩和（QE）": "中央銀行が国債などを大量に買い入れ、市場に出回るお金の量を増やす金融政策。"
+                    "政策金利がゼロ近くまで下がった後の追加緩和策として使われることが多い。",
+    "GDP（国内総生産）": "一定期間にその国内で新たに生み出されたモノやサービスの価値の合計。経済全体の規模や成長率を測る代表的な指標。",
+    "景気後退（リセッション）": "経済活動が一定期間にわたって縮小していく状態。一般的にGDPが2四半期連続でマイナスになると"
+                            "景気後退とみなされることが多い。",
+    "賃金上昇率": "働く人の給与が前年や前月と比べてどれくらい増えたかを示す割合。"
+                "物価上昇（インフレ）に賃金が追いついているかを見る手がかりになる。",
+    "PBR（株価純資産倍率）": "株価が1株あたりの純資産（会社を清算した場合の取り分）の何倍まで買われているかを示す指標。"
+                         "1倍を下回ると「解散価値より割安」とされることがある。",
+    "ROE（自己資本利益率）": "会社が株主から集めたお金（自己資本）を使って、どれだけ効率よく利益を上げているかを示す指標。"
+                         "数字が高いほど資本を有効に使えているとされる。",
+    "配当利回り": "株価に対して、1年間に受け取れる配当金がどれくらいの割合になるかを示す数値。"
+               "株価が下がると数値上は利回りが上がる点に注意が必要。",
+    "増収増益": "売上高（収）と利益（益）が、前の期に比べてどちらも増えている状態。企業の成長を示す基本的な指標の組み合わせ。",
+    "空売り": "株価の下落を見込んで、株を借りて先に売り、値下がりした後に買い戻して差額を得る取引手法。",
+    "円安・円高": "外国通貨に対して円の価値が下がることを「円安」、上がることを「円高」と呼ぶ。"
+               "円安は輸出企業に有利、輸入コストの増加につながりやすい。",
+    "長期金利": "主に10年物国債の利回りを指す、償還までの期間が長い債券の金利。住宅ローン金利など幅広い金利の基準になる。",
+    "逆イールド": "本来は長期金利の方が短期金利より高くなるのが通常だが、これが逆転し短期金利の方が高くなる状態。"
+               "景気後退の前触れとされることがある。",
+    "スタグフレーション": "景気が悪化しているにもかかわらず、物価が上昇し続ける状態。"
+                       "通常の不況とは異なり、金融政策での対応が難しいとされる。",
 }
 
-# 無料エリア／有料エリアそれぞれで登場する用語（記事の構成が概ね固定のため静的に対応付けている）
-FREE_AREA_TERMS = ["CPI", "コアCPI", "失業率", "非農業部門雇用者数", "PMI", "FOMC", "FRB", "PER"]
-PAID_AREA_TERMS = ["時価総額", "EPS", "R²（決定係数）", "ドルインデックス", "レバレッジド・マネー", "ネットポジション"]
+
+def pick_daily_terms(count=2):
+    """経済用語全体から、その日ごとに決まった組み合わせを選ぶ（例：無料エリア用1件＋有料エリア用1件）。
+    状態ファイルでのカウンタ管理はせず、日付（UTC）から決定的に算出する方式にしている。
+    理由：米国株ローテーションの状態ファイルが、下書きの作り直し（同日中の複数回実行）のたびに
+    余計に1つ進んでしまう不具合が実際に起きたため、同じ日に何度実行しても結果が変わらない
+    （＝作り直しても用語がズレない）決定的な方式を採用した。"""
+    pool = list(GLOSSARY.keys())
+    if not pool:
+        return []
+    day_index = datetime.now(JST).date().toordinal()
+    return [pool[(day_index * count + i) % len(pool)] for i in range(count)]
 
 
-def build_glossary_section(term_keys, heading="## 📘 用語解説"):
+def build_glossary_section(term_keys, heading="## 📘 今日の経済用語"):
     lines = [heading, ""]
     for term in term_keys:
         explanation = GLOSSARY.get(term)
@@ -114,7 +159,7 @@ def _todays_stock(candidates_data, state):
 
 def _todays_rotation_draft():
     """us_stock_rotation.py が本日分に保存した下書き（ニュース・決算情報入り）があれば読み込む"""
-    today_str = datetime.now(timezone.utc).strftime("%Y%m%d")
+    today_str = datetime.now(JST).strftime("%Y%m%d")
     path = OUTPUT_DIR / "drafts" / f"us_pick_{today_str}.md"
     if path.exists():
         return path.read_text(encoding="utf-8")
@@ -122,9 +167,12 @@ def _todays_rotation_draft():
 
 
 def build_market_summary(fred):
+    """海外市場サマリー。FREDの株価指数データには約1日の遅延があり、当日朝の記事は
+    実質「前営業日」の終値を報じる形になるため、見出し・文言は「昨日」で統一している
+    （2026-09-05修正、詳細はmarket_calendar.pyのdocstring参照）。"""
     if not fred:
-        return "（本日の海外市場データは未取得です）"
-    lines = ["## 本日の海外市場サマリー", ""]
+        return "（昨日の海外市場データは未取得です）"
+    lines = ["## 昨日の海外市場サマリー", ""]
     index_labels = {"SP500": "S&P500", "NASDAQCOM": "NASDAQ総合指数", "DJIA": "NYダウ平均"}
     for sid, label in index_labels.items():
         s = fred.get(sid, {}).get("summary")
@@ -147,7 +195,8 @@ def build_indicators_section(fred, bls):
     if bls:
         new_releases = [bls_labels.get(sid, sid) for sid, d in bls.items() if d.get("is_new_release")]
         if new_releases:
-            lines.append(f"**【本日発表】{'・'.join(new_releases)}の最新値が発表されました。"
+            # BLSの発表は米国時間の朝(日本時間の夜)のため、本記事(翌朝生成)から見ると「昨日発表」になる
+            lines.append(f"**【昨日発表】{'・'.join(new_releases)}の最新値が発表されました。"
                           f"以下はBLS（米労働省統計局）の速報値を反映しています。**")
             lines.append("")
 
@@ -183,13 +232,17 @@ def build_indicators_section(fred, bls):
     lines.append("> 数値は特に断りがない限りFRED（セントルイス連銀）を情報源としています。"
                   "指標発表当日はBLS（米労働省統計局）一次発表の速報値を優先して反映します。"
                   "正式なISM/S&P Global PMIは無料での取得元が無いため、地区連銀の製造業サーベイを"
-                  "PMI発表前の先行指標として代わりに掲載しています（0が拡大/縮小の境目）。")
+                  "PMI発表前の先行指標として代わりに掲載しています（0が拡大/縮小の境目）。"
+                  "指標ごとに発表タイミングが異なる（CPIは発表月の前々月分、雇用統計は前月分など）ため、"
+                  "表内の「最新値」の対象月が指標間でずれることがあります。")
     lines.append("")
     return "\n".join(lines)
 
 
 def build_fed_section(fed):
-    """FRB公式発表（一次情報）のセクション。新着があれば強調し、無ければ直近の発表を参考情報として載せる"""
+    """FRB公式発表（一次情報）のセクション。新着があれば強調し、無ければ直近の発表を参考情報として載せる。
+    金融政策プレスリリース（FOMC声明等）に加えて、議長の講演（ジャクソンホール会議等もこちら）も
+    新着があれば掲載する（2026-08-31追加）。"""
     lines = ["## FRB最新発表", ""]
     if not fed or not fed.get("items"):
         lines.append("（FRB発表データは未取得です）")
@@ -207,8 +260,23 @@ def build_fed_section(fed):
         lines.append("")
         for item in fed["items"][:3]:
             lines.append(f"- [{item['title']}]({item['link']})（{item['pub_date']}）")
+
+    new_chair_speeches = fed.get("new_chair_speeches") or []
+    chair_speeches = fed.get("chair_speeches") or []
+    if new_chair_speeches:
+        lines.append("")
+        lines.append("**FRB議長の講演（前回チェック以降の新着）：**")
+        lines.append("")
+        for item in new_chair_speeches:
+            lines.append(f"- [{item['title']}]({item['link']})（{item['pub_date']}）")
+    elif chair_speeches:
+        lines.append("")
+        lines.append("**FRB議長の直近の講演：**")
+        lines.append("")
+        lines.append(f"- [{chair_speeches[0]['title']}]({chair_speeches[0]['link']})（{chair_speeches[0]['pub_date']}）")
+
     lines.append("")
-    lines.append("> 出典：FRB公式サイト（federalreserve.gov）のプレスリリースRSSフィードより。"
+    lines.append("> 出典：FRB公式サイト（federalreserve.gov）のプレスリリース・講演RSSフィードより。"
                   "解説記事より先に一次発表そのものを参照する方針です。")
     lines.append("")
     return "\n".join(lines)
@@ -377,6 +445,8 @@ def build_hashtags(fred, bls, fed):
 
     if fed and fed.get("new_items"):
         tags.append("#FOMC")
+    if fed and fed.get("new_chair_speeches"):
+        tags.append("#FRB議長発言")
 
     return " ".join(tags)
 
@@ -388,13 +458,14 @@ def build_article():
     fx = _latest_json("fx_indicators_*.json")
     candidates_data = _latest_json("us_premium_rotation_candidates.json")
     state = _latest_json("rotation_state.json")
+    free_term, paid_term = pick_daily_terms(count=2)
 
-    today = datetime.now(timezone.utc).strftime("%Y/%m/%d")
+    today = datetime.now(JST).strftime("%Y/%m/%d")
 
     parts = [
         f"# 【{today}】市場サマリーと注目銘柄ピックアップ",
         "",
-        "本日の海外市場の値動きと主要経済指標、そして独自スクリーニングによる注目銘柄をお届けします。",
+        "昨日の海外市場の値動きと主要経済指標を振り返るとともに、独自スクリーニングで絞り込んだ本日の注目銘柄をお届けします。",
         "",
         "---",
         "",
@@ -402,7 +473,7 @@ def build_article():
         build_indicators_section(fred, bls),
         build_fed_section(fed),
         build_jp_pick_section(),
-        build_glossary_section(FREE_AREA_TERMS),
+        build_glossary_section([free_term]),
         "---",
         "",
         build_us_pick_teaser(candidates_data, state),
@@ -413,7 +484,7 @@ def build_article():
         "",
         build_us_pick_full(candidates_data, state) if candidates_data and state else "",
         build_fx_section(fx),
-        build_glossary_section(PAID_AREA_TERMS, heading="## 📘 用語解説（有料エリアの用語）"),
+        build_glossary_section([paid_term], heading="## 📘 今日の経済用語（有料エリア）"),
         "---",
         "",
         build_hashtags(fred, bls, fed),
@@ -425,7 +496,7 @@ def build_article():
 if __name__ == "__main__":
     article = build_article()
     OUTPUT_DIR.mkdir(exist_ok=True)
-    out_path = OUTPUT_DIR / f"article_draft_{datetime.now(timezone.utc).strftime('%Y%m%d')}.md"
+    out_path = OUTPUT_DIR / f"article_draft_{datetime.now(JST).strftime('%Y%m%d')}.md"
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(article)
     print(f"下書きを保存しました: {out_path}")
