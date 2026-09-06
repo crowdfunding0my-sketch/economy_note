@@ -242,10 +242,18 @@ def clear_checkpoint():
         CHECKPOINT_PATH.unlink()
 
 
-def save_progress(processed, total, hits_so_far, last_code, started_at):
+def save_progress(processed, total, hits_so_far, last_code, started_at, session_processed=None):
+    """
+    session_processed: 今回の実行セッションで実際に処理した件数（再開時はcheckpointの
+    続きから数える）。ペース計算に絶対値のprocessedを使うと、中断・再開直後は
+    「elapsed(このセッションの経過時間)÷processed(全体の累計処理数)」という
+    不整合な割り算になり、残り時間が実態よりずっと短く表示される不具合があった
+    （2026-09-06発見・修正）。session_processedが渡されなければ従来通りprocessedを使う。
+    """
     elapsed = time.monotonic() - started_at
     remaining = total - processed
-    eta_sec = remaining * (elapsed / processed) if processed else None
+    pace_base = session_processed if session_processed else processed
+    eta_sec = remaining * (elapsed / pace_base) if pace_base else None
     OUTPUT_DIR.mkdir(exist_ok=True)
     with open(PROGRESS_PATH, "w", encoding="utf-8") as f:
         json.dump({
@@ -361,7 +369,8 @@ def screen(codes, start_index=0, candidates=None, overall_started_at=None, verbo
         processed = i + 1
         if processed % PROGRESS_UPDATE_EVERY == 0 or processed == total:
             save_checkpoint(codes, processed, candidates, overall_started_at)
-            save_progress(processed, total, len(candidates), code, session_started_at)
+            save_progress(processed, total, len(candidates), code, session_started_at,
+                          session_processed=processed - start_index)
             if verbose:
                 print(f"...{processed}/{total} 銘柄処理済み（ヒット{len(candidates)}件）", flush=True)
 
