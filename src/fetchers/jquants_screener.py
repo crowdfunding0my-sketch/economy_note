@@ -4,9 +4,13 @@ J-Quants API V2 銘柄スクリーニングスクリプト（有料エリア「�
 条件（すべてAND）:
   1. 時価総額が SMALL_CAP_MAX_MKTCAP 以下（小型株）
   2. 売上高・営業利益が直近N期(デフォルト3期)連続増加
-  3. PER 15倍以下
-  4. 過去2年程度の株価が右肩上がり（回帰直線の傾き>0）かつ一貫性がある（決定係数R²が閾値以上）
+  3. 過去2年程度の株価が右肩上がり（回帰直線の傾き>0）かつ一貫性がある（決定係数R²が閾値以上）
 上記を満たす銘柄の中から、2年間の株価上昇率が高い順に上位15銘柄を抽出する。
+
+【2026-09-06 方針転換】当初はここにさらに「PER15倍以下」（割安）の条件も課していたが、
+米国株の有料エリア（1-3.参照）と同じく、割安×小型×連続増益×上昇トレンドを同時に満たす銘柄は
+ほぼ存在しないことが確認できたため、PER・黒字条件は判定から外し「成長モメンタム株」方式に
+統一した。EPS・PERは参考情報としてCSVには引き続き出力する（赤字の場合はNone）。
 
 対象: グロース市場・スタンダード市場（小型株の比率が高いため。プライムは対象外）
 
@@ -86,7 +90,7 @@ API_KEY = os.environ.get("JQUANTS_API_KEY", "")
 HEADERS = {"x-api-key": API_KEY}
 
 # スクリーニング条件
-MAX_PER = 15.0
+# MAX_PER（旧: 15.0倍以下）は2026-09-06に判定条件から撤廃（成長モメンタム方式への転換、詳細は上部docstring参照）
 CONSECUTIVE_GROWTH_YEARS = 3  # 直近何期分の増収増益を要求するか
 SMALL_CAP_MAX_MKTCAP = 50_000  # 時価総額の上限（百万円単位。J-QuantsのMktCapと同じ単位＝500億円）
 TREND_MIN_R2 = 0.3  # 株価トレンドの「一貫性」とみなす決定係数R²の下限（要調整の目安値）
@@ -286,9 +290,11 @@ def _evaluate_code(code):
     if not is_consecutive_growth(fy):
         return None
 
+    # 2026-09-06: 米国株の「成長モメンタム株」方針転換と同じ考え方で、PER・黒字条件は
+    # 判定条件から外した（割安×小型×連続増益×上昇トレンドを同時に満たす銘柄はほぼ存在しない
+    # ことが確認できたため）。EPS・PERは参考情報として引き続き記録するが、赤字銘柄・
+    # PER15倍超でも他の条件を満たせば候補に含める。
     eps = latest_eps(fy)
-    if not eps or eps <= 0:
-        return None
 
     history = get_price_history(code)
     if len(history) < MIN_PRICE_POINTS:
@@ -303,9 +309,7 @@ def _evaluate_code(code):
     if mktcap > SMALL_CAP_MAX_MKTCAP:
         return None
 
-    per = price / eps
-    if per > MAX_PER:
-        return None
+    per = round(price / eps, 2) if eps else None
 
     closes = [h["C"] for h in history if h.get("C") is not None]
     slope, r_squared = linear_trend(closes)
@@ -318,8 +322,8 @@ def _evaluate_code(code):
     return {
         "code": code,
         "price": price,
-        "eps": round(eps, 2),
-        "per": round(per, 2),
+        "eps": round(eps, 2) if eps is not None else None,
+        "per": per,
         "mktcap_million_yen": mktcap,
         "trend_slope": round(slope, 4),
         "trend_r2": round(r_squared, 3),
@@ -417,8 +421,8 @@ def _main():
 
     print(f"リクエスト間隔: {REQUEST_INTERVAL_SEC:.1f}秒（{REQUESTS_PER_MINUTE}req/分想定）")
     print(f"条件: 時価総額{SMALL_CAP_MAX_MKTCAP:,}百万円以下 / "
-          f"増収営業増益{CONSECUTIVE_GROWTH_YEARS}期連続 / PER{MAX_PER}倍以下 / "
-          f"株価トレンド右肩上がり(R2>={TREND_MIN_R2})")
+          f"増収営業増益{CONSECUTIVE_GROWTH_YEARS}期連続 / "
+          f"株価トレンド右肩上がり(R2>={TREND_MIN_R2}) ※PER・黒字条件は不問（成長モメンタム方式）")
     print(f"進捗は{PROGRESS_PATH}で随時確認できます。")
 
     all_hits = screen(codes, start_index=start_index, candidates=candidates_so_far,
