@@ -285,14 +285,22 @@ def build_fed_section(fed):
 def build_jp_pick_section():
     """
     日本株ピックアップ（無料エリア）。J-Quantsの全銘柄スクリーニングはFreeプランだと
-    約14.5時間かかるため、main.pyの日次実行には含めず、週次で別途実行してCSVに
+    約14.5時間かかるため、main.pyの日次実行には含めず、週次〜月次で別途実行してCSVに
     キャッシュする運用（src/fetchers/jquants_screener.py を参照）。
     本関数はそのキャッシュ済みCSVのうち最新のものを読み込むだけ。
+
+    【2026-09-08 日替わりローテーション追加】PER15倍以下の条件を復活させたところ
+    396件程度のヒットが確保できるようになったため、毎回同じ上位3件を表示し続けるのではなく、
+    JST基準の年内通算日（day of year）でプール内をスライドする窓を使い、日替わりで
+    異なる3件を表示するようにした。米国株側（_todays_stock）のような状態ファイルは持たず、
+    「日付とプールの中身だけで決まる」純粋な計算にしているため、実行タイミングのズレによる
+    再現性の問題が起きない。母数が大きいほどローテーション一周にかかる日数も伸びる
+    （396件÷3件/日 ≒ 132日で一周）。
     """
     rows, path = _latest_csv_rows("screening_result_*.csv")
     lines = ["## 本日の日本株ピックアップ（無料）", ""]
     if rows is None:
-        lines.append("（週次スクリーニング未実行のため、まだ候補がありません。"
+        lines.append("（スクリーニング未実行のため、まだ候補がありません。"
                       "`python src/fetchers/jquants_screener.py` の実行後に反映されます）")
         lines.append("")
         return "\n".join(lines)
@@ -303,13 +311,15 @@ def build_jp_pick_section():
         lines.append("")
         return "\n".join(lines)
 
-    # 2026-09-07: PER15倍以下・増収営業増益3期連続という条件だと2169銘柄中0件だったため、
-    # 米国株の有料エリアと同じ「成長モメンタム株」基準（小型株＋直近期売上高成長＋株価トレンド
-    # 上昇、PER・黒字は不問）に変更した。表示もPERではなく売上高成長率を主役にしている。
     lines.append(f"（{scan_date} 実行のスクリーニング結果より。小型株・直近期の売上高成長・"
-                  f"株価トレンド上昇を満たした銘柄。割安さ・黒字かどうかは問いません）")
+                  f"PER15倍以下（黒字）・株価トレンド上昇を満たした{len(rows)}銘柄の中から、"
+                  f"日替わりで{JP_PICKS_SHOWN}件を紹介します）")
     lines.append("")
-    top_rows = sorted(rows, key=lambda r: float(r["price_change_rate"]), reverse=True)[:JP_PICKS_SHOWN]
+    sorted_rows = sorted(rows, key=lambda r: float(r["price_change_rate"]), reverse=True)
+    day_index = datetime.now(JST).timetuple().tm_yday
+    window = min(JP_PICKS_SHOWN, len(sorted_rows))
+    start = (day_index * JP_PICKS_SHOWN) % len(sorted_rows)
+    top_rows = [sorted_rows[(start + i) % len(sorted_rows)] for i in range(window)]
     for r in top_rows:
         per_text = f"PER {float(r['per']):.1f}倍" if r.get("per") else "PER算出不可（赤字）"
         growth_text = f"売上高成長率 {float(r['revenue_growth_rate'])*100:+.1f}%" if r.get("revenue_growth_rate") else ""

@@ -4,16 +4,24 @@ J-Quants API V2 銘柄スクリーニングスクリプト（無料エリア「�
 条件（すべてAND）:
   1. 時価総額が SMALL_CAP_MAX_MKTCAP 以下（小型株）
   2. 直近期の売上高が前期より増加
-  3. 過去2年程度の株価が右肩上がり（回帰直線の傾き>0）かつ一貫性がある（決定係数R²が閾値以上）
-上記を満たす銘柄の中から、2年間の株価上昇率が高い順に上位15銘柄を抽出する。
+  3. PERが MAX_PER 以下（黒字であること含む）
+  4. 過去2年程度の株価が右肩上がり（回帰直線の傾き>0）かつ一貫性がある（決定係数R²が閾値以上）
+上記を満たす銘柄を、2年間の株価上昇率が高い順に並べて全件CSVに保存する
+（旧: 上位15銘柄のみ保存だったが、母数が大きくなったため2026-09-08にTOP_N絞り込みを撤廃。
+article_builder.py側で日替わりローテーション表示する）。
 
 【2026-09-06/07 方針転換】当初は「PER15倍以下」（割安）と「売上高・営業利益が3期連続増加」
 という、より厳しい条件だったが、米国株の有料エリア（1-3.参照）と同じく、割安×小型×連続増益×
 上昇トレンドを同時に満たす銘柄はほぼ存在しないことが確認できた（2169銘柄中0件）。
 そこでまずPER・黒字条件を撤廃したが、それでも0件だったため、増収の判定も「3期連続」から
 「直近1期のみ」に緩和し、米国株の有料エリアと完全に同じ基準（直近1期の売上高成長のみ、
-営業利益・複数期連続は問わない）に統一した。EPS・PERは参考情報としてCSVには引き続き
-出力する（赤字の場合はNone）。
+営業利益・複数期連続は問わない）に統一した。
+
+【2026-09-08 PER条件の復活】上記の緩和後（PER不問）で全銘柄走査したところ580件ヒットし、
+そのうち396件がPER15倍以下だった（十分な母数）。そこで「割安さ」の参考情報だったPER条件を
+判定条件として復活させた（小型株＋直近期売上高成長＋PER15倍以下＋株価トレンド上昇）。
+これにより一時的な緩和策（PER不問の成長モメンタム方式）から、より本来の「割安成長株」
+スクリーニングに戻している。
 
 対象: グロース市場・スタンダード市場（小型株の比率が高いため。プライムは対象外）
 
@@ -93,13 +101,18 @@ API_KEY = os.environ.get("JQUANTS_API_KEY", "")
 HEADERS = {"x-api-key": API_KEY}
 
 # スクリーニング条件
-# MAX_PER（旧: 15.0倍以下）は2026-09-06に判定条件から撤廃（成長モメンタム方式への転換、詳細は上部docstring参照）
-# CONSECUTIVE_GROWTH_YEARS（旧: 3期連続増収増益）も2026-09-07に撤廃。米国株の有料エリアと
+# CONSECUTIVE_GROWTH_YEARS（旧: 3期連続増収増益）は2026-09-07に撤廃。米国株の有料エリアと
 # 同じ基準（直近1期の売上高成長のみ、営業利益・複数期連続は問わない）に統一した（has_revenue_growth参照）。
+# MAX_PER は2026-09-06にいったん撤廃したが、580件ヒットのうち396件がPER15倍以下で
+# 十分な母数を確保できることを確認できたため、2026-09-08に「割安さの参考情報」ではなく
+# 判定条件として復活させた（小型株＋直近期売上高成長＋株価トレンド上昇＋PER15倍以下）。
 SMALL_CAP_MAX_MKTCAP = 50_000  # 時価総額の上限（百万円単位。J-QuantsのMktCapと同じ単位＝500億円）
 TREND_MIN_R2 = 0.3  # 株価トレンドの「一貫性」とみなす決定係数R²の下限（要調整の目安値）
 MIN_PRICE_POINTS = 200  # トレンド判定に必要な最低営業日数（目安：約10ヶ月分）
-TOP_N = 15  # 最終的に記事に載せる銘柄数
+MAX_PER = 15.0  # PERの上限（黒字かつ割安とみなす基準）
+# TOP_N（旧: 上位15銘柄のみCSV保存）は2026-09-08に撤廃。PER条件込みで数百件規模の
+# 母集団を確保できるようになったため、条件に合致した銘柄は全件CSVに保存し、
+# article_builder.py側で日替わりローテーション表示する運用に変更した。
 
 # Freeプラン=5req/分が前提。上位プランに変更したら環境変数で上書きする。
 REQUESTS_PER_MINUTE = int(os.environ.get("JQUANTS_REQUESTS_PER_MINUTE", "5"))
@@ -298,10 +311,6 @@ def _evaluate_code(code):
         return None
     revenue_growth_rate = round(float(fy[-1]["Sales"]) / float(fy[-2]["Sales"]) - 1, 4)
 
-    # 2026-09-06: 米国株の「成長モメンタム株」方針転換と同じ考え方で、PER・黒字条件は
-    # 判定条件から外した（割安×小型×連続増益×上昇トレンドを同時に満たす銘柄はほぼ存在しない
-    # ことが確認できたため）。EPS・PERは参考情報として引き続き記録するが、赤字銘柄・
-    # PER15倍超でも他の条件を満たせば候補に含める。
     eps = latest_eps(fy)
 
     history = get_price_history(code)
@@ -318,6 +327,9 @@ def _evaluate_code(code):
         return None
 
     per = round(price / eps, 2) if eps else None
+    # 2026-09-08: PER条件を復活。赤字（eps<=0によりper=None）・PER15倍超は除外する
+    if per is None or per <= 0 or per > MAX_PER:
+        return None
 
     closes = [h["C"] for h in history if h.get("C") is not None]
     slope, r_squared = linear_trend(closes)
@@ -429,15 +441,15 @@ def _main():
 
     print(f"リクエスト間隔: {REQUEST_INTERVAL_SEC:.1f}秒（{REQUESTS_PER_MINUTE}req/分想定）")
     print(f"条件: 時価総額{SMALL_CAP_MAX_MKTCAP:,}百万円以下 / "
-          f"直近期の売上高成長 / "
-          f"株価トレンド右肩上がり(R2>={TREND_MIN_R2}) ※PER・黒字・営業利益・複数期連続は不問（成長モメンタム方式）")
+          f"直近期の売上高成長 / PER{MAX_PER}倍以下（黒字） / "
+          f"株価トレンド右肩上がり(R2>={TREND_MIN_R2}) ※営業利益・複数期連続は不問（成長モメンタム方式）")
     print(f"進捗は{PROGRESS_PATH}で随時確認できます。")
 
     all_hits = screen(codes, start_index=start_index, candidates=candidates_so_far,
                        overall_started_at=overall_started_at)
-    results = all_hits[:TOP_N]
+    results = all_hits
 
-    print(f"\n条件合致銘柄数（全{len(all_hits)}件中、上位{TOP_N}件抽出後）: {len(results)}")
+    print(f"\n条件合致銘柄数（全件保存）: {len(results)}")
     out_path = save_results(results)
     print(f"結果を保存しました: {out_path}")
 
