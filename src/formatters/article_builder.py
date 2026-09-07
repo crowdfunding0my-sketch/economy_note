@@ -298,6 +298,7 @@ def build_jp_pick_section():
     （396件÷3件/日 ≒ 132日で一周）。
     """
     rows, path = _latest_csv_rows("screening_result_*.csv")
+    name_map = _latest_json("jquants_company_names.json") or {}
     lines = ["## 本日の日本株ピックアップ（無料）", ""]
     if rows is None:
         lines.append("（スクリーニング未実行のため、まだ候補がありません。"
@@ -321,10 +322,17 @@ def build_jp_pick_section():
     start = (day_index * JP_PICKS_SHOWN) % len(sorted_rows)
     top_rows = [sorted_rows[(start + i) % len(sorted_rows)] for i in range(window)]
     for r in top_rows:
+        # J-QuantsのCodeは5桁（末尾は通常"0"）だが、証券コードとして流通しているのは
+        # 先頭4桁（例："72030"→証券コード"7203"）なので、表示用に末尾の0を取り除く
+        # （2026-09-08：ユーザーから「5桁だと銘柄が見つからない」との指摘を受けて対応）。
+        raw_code = r["code"]
+        code_display = raw_code[:-1] if raw_code.endswith("0") else raw_code
+        company_name = name_map.get(raw_code, "")
+        label = f"{code_display}　{company_name}" if company_name else code_display
         per_text = f"PER {float(r['per']):.1f}倍" if r.get("per") else "PER算出不可（赤字）"
         growth_text = f"売上高成長率 {float(r['revenue_growth_rate'])*100:+.1f}%" if r.get("revenue_growth_rate") else ""
         lines.append(
-            f"- **{r['code']}**：{growth_text}／{per_text}／株価{float(r['price']):,.0f}円／"
+            f"- **{label}**：{growth_text}／{per_text}／株価{float(r['price']):,.0f}円／"
             f"過去の株価上昇率 {float(r['price_change_rate'])*100:+.1f}%"
         )
     lines.append("")

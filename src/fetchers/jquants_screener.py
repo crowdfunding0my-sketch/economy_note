@@ -439,6 +439,13 @@ def _main():
         overall_started_at = None
         print(f"対象銘柄数: {len(codes)}（{'/'.join(TARGET_MARKETS)}）")
 
+        # 銘柄コード→会社名のマッピングを保存（article_builder.py側で表示に使う。
+        # 2026-09-08追加：Codeが5桁でそのままだと証券コードとして通用せず銘柄も
+        # 特定できないという指摘があったため、会社名も併記できるようにした）。
+        name_map = {e["Code"]: e.get("CoName", "") for e in equities}
+        with open(OUTPUT_DIR / "jquants_company_names.json", "w", encoding="utf-8") as f:
+            json.dump(name_map, f, ensure_ascii=False, indent=2)
+
     print(f"リクエスト間隔: {REQUEST_INTERVAL_SEC:.1f}秒（{REQUESTS_PER_MINUTE}req/分想定）")
     print(f"条件: 時価総額{SMALL_CAP_MAX_MKTCAP:,}百万円以下 / "
           f"直近期の売上高成長 / PER{MAX_PER}倍以下（黒字） / "
