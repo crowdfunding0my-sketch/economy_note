@@ -316,6 +316,16 @@ def build_jp_pick_section():
                   f"PER15倍以下（黒字）・株価トレンド上昇を満たした{len(rows)}銘柄の中から、"
                   f"日替わりで{JP_PICKS_SHOWN}件を紹介します）")
     lines.append("")
+    # 2026-09-08: J-Quants Freeプランは直近12週間分のデータを取得できない制約があり、
+    # 「スキャン実行日」と「株価・PERが実際に何時点のものか」がズレる（例:9月に実行しても
+    # 株価は6月時点）。ユーザーからYahoo!ファイナンス等と値が異なるとの指摘を受けて調査した結果、
+    # この制約が原因と判明したため、株価データの時点(period_end)を明記して誤解を防ぐようにした。
+    data_as_of = rows[0].get("period_end", "")
+    if data_as_of:
+        lines.append(f"※株価・PERはデータ取得元（J-Quants Freeプラン）の制約により、"
+                      f"最新12週間分は取得できず**{data_as_of}時点**のものになります。"
+                      f"直近の値はYahoo!ファイナンス等で改めてご確認ください。")
+        lines.append("")
     sorted_rows = sorted(rows, key=lambda r: float(r["price_change_rate"]), reverse=True)
     day_index = datetime.now(JST).timetuple().tm_yday
     window = min(JP_PICKS_SHOWN, len(sorted_rows))
