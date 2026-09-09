@@ -144,6 +144,27 @@ J-Quants Freeプランの「データ取得可能期間は直近12週間〜過�
 明示するようにした。根本解決（最新12週間分も取得する）にはJ-Quantsの有料プランへの
 アップグレードが必要（詳細は「1.」冒頭の制約説明を参照）。
 
+**事業内容（何をしている会社か）の表示を追加（2026-09-10）**：ユーザーから「米国株・日本株
+ともに、どんな事業をやっている会社か書かれていない」との指摘を受けて対応。
+- 米国株側：`output/us_premium_rotation_candidates.json`の各候補に、50〜100字程度の
+  固定説明文（`business_desc`、Stage C選定時に一度だけ人手で作成）を追加。加えて、
+  Alpha Vantage OVERVIEWのSector/Industry/Descriptionから生成する既存の詳細版
+  （`us_stock_rotation.py`の`build_business_section`）も、レート制限で無言のまま
+  空データが返ることがあり「事業内容」セクション自体が消えることがあった不具合を
+  あわせて修正し、`business_desc`を常に表示される土台、Alpha Vantage側を取得できた
+  ときの補足情報という2段構成にした。
+- 日本株側：J-Quantsには事業内容の自由記述データが無いため、日本語版Wikipediaの
+  要約API（`https://ja.wikipedia.org/api/rest_v1/page/summary/`、無料・認証不要、
+  ただしUser-Agentヘッダー必須＝無いと403）を新設の
+  [src/fetchers/jquants_screener.py](src/fetchers/jquants_screener.py)の
+  `fetch_business_desc()`で叩き、句点区切りで90字程度に切り詰めて使う。
+  スキャン対象の全銘柄(約2,168件)ではなく**ヒットした銘柄のみ**（今回は388件）に
+  絞ることで無駄なリクエストを避けている。会社名でページが見つからない場合
+  （実測で約25%）は、J-Quantsの業種分類（Sector33Name）だけの簡易文にフォールバックする。
+  結果は`output/jquants_business_desc.json`にキャッシュし、
+  `article_builder.py`の`build_jp_pick_section()`が読み込んで表示する。
+  今後の月次スキャン（`jquants_screener.py`の`_main()`）で自動的に再生成される。
+
 ---
 
 ## 1-2.（旧案・現在は無効）日本の小型株スクリーニングを有料エリアにする案

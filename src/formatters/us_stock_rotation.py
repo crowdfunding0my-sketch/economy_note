@@ -187,16 +187,29 @@ def translate_to_japanese(text):
         return None
 
 
-def build_business_section(overview):
-    """Alpha Vantage OVERVIEWのSector/Industry/Descriptionから「事業内容」セクションを組み立てる。
-    翻訳に失敗した場合は英語原文をそのまま表示する。"""
+def build_business_section(stock, overview):
+    """「事業内容」セクションを組み立てる。
+
+    2026-09-10追加: 従来はAlpha Vantage OVERVIEWのSector/Industry/Descriptionのみに
+    依存していたが、OVERVIEWはレート制限（5req/分）で無言のまま空データが返ることがあり
+    （HTTPエラーにならないため検知しづらい）、その場合「事業内容」セクションが記事に
+    一切表示されない不具合があった（ユーザー指摘で発覚）。
+    us_premium_rotation_candidates.jsonに候補選定時（Stage C）から埋め込んである
+    50〜100字程度の固定説明文（business_desc）を常に表示する土台とし、
+    Alpha Vantageからより詳しい分野・説明文が取得できた場合は追加情報として補う構成にした。
+    """
+    lines = ["**事業内容**", ""]
+
+    business_desc = stock.get("business_desc")
+    if business_desc:
+        lines.append(business_desc)
+        lines.append("")
+
     sector = overview.get("Sector")
     industry = overview.get("Industry")
     description = overview.get("Description")
     if not (sector or industry or description):
-        return None
-
-    lines = ["**事業内容**", ""]
+        return "\n".join(lines) if business_desc else None
 
     field_en = " / ".join(p for p in [sector, industry] if p)
     if field_en:
@@ -228,7 +241,7 @@ def format_draft(stock, news_items, overview):
         "",
     ]
 
-    business_section = build_business_section(overview)
+    business_section = build_business_section(stock, overview)
     if business_section:
         lines += [business_section, ""]
 

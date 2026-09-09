@@ -296,9 +296,15 @@ def build_jp_pick_section():
     「日付とプールの中身だけで決まる」純粋な計算にしているため、実行タイミングのズレによる
     再現性の問題が起きない。母数が大きいほどローテーション一周にかかる日数も伸びる
     （396件÷3件/日 ≒ 132日で一周）。
+
+    【2026-09-10 事業内容の表示を追加】J-Quantsには事業内容の自由記述データが無いため、
+    jquants_screener.py側でヒット銘柄についてのみ日本語版Wikipediaの要約を取得し、
+    output/jquants_business_desc.jsonにキャッシュしたものを読み込んで表示する
+    （米国株側で「事業内容が書かれていない」との指摘を受け、日本株側も同様に対応した）。
     """
     rows, path = _latest_csv_rows("screening_result_*.csv")
     name_map = _latest_json("jquants_company_names.json") or {}
+    business_desc_map = _latest_json("jquants_business_desc.json") or {}
     lines = ["## 本日の日本株ピックアップ（無料）", ""]
     if rows is None:
         lines.append("（スクリーニング未実行のため、まだ候補がありません。"
@@ -345,6 +351,9 @@ def build_jp_pick_section():
             f"- **{label}**：{growth_text}／{per_text}／株価{float(r['price']):,.0f}円／"
             f"過去の株価上昇率 {float(r['price_change_rate'])*100:+.1f}%"
         )
+        business_desc = business_desc_map.get(raw_code)
+        if business_desc:
+            lines.append(f"　　{business_desc}")
     lines.append("")
     return "\n".join(lines)
 
@@ -393,6 +402,10 @@ def build_us_pick_full(candidates_data, state):
     lines = [
         f"### {stock['symbol']}（{stock.get('company_hint', '')}）",
         "",
+    ]
+    if stock.get("business_desc"):
+        lines += ["**事業内容**", "", stock["business_desc"], ""]
+    lines += [
         f"- 売上高：{stock['revenue_curr']:,.0f}ドル（前期 {stock['revenue_prev']:,.0f}ドル、"
         f"{stock['revenue_growth_rate']*100:+.1f}%）",
         f"- EPS（直近期）：{stock['eps_curr']}",

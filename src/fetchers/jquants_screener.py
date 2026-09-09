@@ -56,11 +56,13 @@ article_builder.py側で日替わりローテーション表示する）。
 """
 
 import os
+import re
 import sys
 import json
 import time
 import csv
 import traceback
+import urllib.parse
 import requests
 from datetime import datetime
 from pathlib import Path
@@ -68,6 +70,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from trend_utils import linear_trend
+from http_utils import get_with_retry
 
 load_dotenv()
 
@@ -140,6 +143,49 @@ def _get(url, params=None):
     resp = requests.get(url, headers=HEADERS, params=params, timeout=REQUEST_TIMEOUT_SEC)
     time.sleep(REQUEST_INTERVAL_SEC)
     return resp
+
+
+WIKIPEDIA_SUMMARY_URL = "https://ja.wikipedia.org/api/rest_v1/page/summary/"
+# WikipediaのREST APIはUser-Agent無しだと403を返す（Wikimediaの利用規約要件）
+WIKIPEDIA_HEADERS = {"User-Agent": "SoubaNoteBot/1.0 (contact: crowdfunding0m.y@gmail.com)"}
+BUSINESS_DESC_TARGET_LEN = 90  # 事業内容の目安文字数（50〜100字程度、記事側の要望に合わせる）
+
+
+def _trim_ja_text(text, target_len=BUSINESS_DESC_TARGET_LEN):
+    """句点「。」区切りで、target_len文字以降の最初の句点までを採用する
+    （Wikipediaの要約は複数文にわたることがあり、全部載せると長すぎるため）。"""
+    if not text:
+        return text
+    boundaries = [m.end() for m in re.finditer("。", text)]
+    cutoff = next((b for b in boundaries if b >= target_len), None)
+    if cutoff is None:
+        return text
+    return text[:cutoff]
+
+
+def fetch_business_desc(company_name, sector_name=None):
+    """
+    銘柄の「事業内容」の説明文を取得する（2026-09-10追加）。
+
+    J-Quantsには事業内容の自由記述データが無く、業種分類（Sector33Name）のみしか
+    取得できないため、日本語版Wikipediaの要約API（無料・認証不要）を使う。
+    会社名でページが見つからない（404等）場合は、業種分類だけの簡易文にフォールバックする
+    （何も表示されないよりは、粗くても業種情報がある方が良いという判断）。
+    """
+    try:
+        url = WIKIPEDIA_SUMMARY_URL + urllib.parse.quote(company_name)
+        resp = get_with_retry(url, headers=WIKIPEDIA_HEADERS, timeout=10, max_retries=2, backoff_sec=2)
+        if resp.status_code == 200:
+            extract = resp.json().get("extract", "")
+            trimmed = _trim_ja_text(extract)
+            if trimmed:
+                return trimmed
+    except requests.exceptions.RequestException:
+        pass
+
+    if sector_name:
+        return f"業種は「{sector_name}」に分類される企業です（Wikipediaに該当ページが見つからなかったため業種のみ表示）。"
+    return None
 
 
 def get_listed_equities(market_filters=None):
@@ -423,6 +469,16 @@ def _main():
     if not API_KEY:
         raise SystemExit(".env に JQUANTS_API_KEY を設定してください")
 
+    # 銘柄コード→会社名・業種のマッピングは、チェックポイント再開時も含めて毎回最新化する
+    # （2026-09-08追加：Codeが5桁でそのままだと証券コードとして通用せず銘柄も特定できない
+    # という指摘があったため、会社名も併記できるようにした。2026-09-10：事業内容の
+    # フォールバック文言に使う業種名(S33Nm)も同時に保存するよう拡張）。
+    equities = get_listed_equities(market_filters=TARGET_MARKETS)
+    name_map = {e["Code"]: e.get("CoName", "") for e in equities}
+    sector_map = {e["Code"]: e.get("S33Nm", "") for e in equities}
+    with open(OUTPUT_DIR / "jquants_company_names.json", "w", encoding="utf-8") as f:
+        json.dump(name_map, f, ensure_ascii=False, indent=2)
+
     checkpoint = load_checkpoint()
     if checkpoint:
         codes = checkpoint["codes"]
@@ -432,19 +488,11 @@ def _main():
         print(f"前回の中断分を検知: {start_index}/{len(codes)} 銘柄まで処理済み"
               f"（開始: {overall_started_at}）。続きから再開します。")
     else:
-        equities = get_listed_equities(market_filters=TARGET_MARKETS)
         codes = [e["Code"] for e in equities]
         start_index = 0
         candidates_so_far = []
         overall_started_at = None
         print(f"対象銘柄数: {len(codes)}（{'/'.join(TARGET_MARKETS)}）")
-
-        # 銘柄コード→会社名のマッピングを保存（article_builder.py側で表示に使う。
-        # 2026-09-08追加：Codeが5桁でそのままだと証券コードとして通用せず銘柄も
-        # 特定できないという指摘があったため、会社名も併記できるようにした）。
-        name_map = {e["Code"]: e.get("CoName", "") for e in equities}
-        with open(OUTPUT_DIR / "jquants_company_names.json", "w", encoding="utf-8") as f:
-            json.dump(name_map, f, ensure_ascii=False, indent=2)
 
     print(f"リクエスト間隔: {REQUEST_INTERVAL_SEC:.1f}秒（{REQUESTS_PER_MINUTE}req/分想定）")
     print(f"条件: 時価総額{SMALL_CAP_MAX_MKTCAP:,}百万円以下 / "
@@ -459,6 +507,24 @@ def _main():
     print(f"\n条件合致銘柄数（全件保存）: {len(results)}")
     out_path = save_results(results)
     print(f"結果を保存しました: {out_path}")
+
+    # ヒット銘柄分のみ、事業内容（Wikipedia要約）を取得する（2026-09-10追加）。
+    # 全対象銘柄(約2,168件)ではなく実際にヒットした銘柄だけに絞ることで、
+    # 記事に載る可能性が無い銘柄への無駄なリクエストを避けている。
+    print(f"\n事業内容（Wikipedia要約）を取得中...（{len(results)}件）")
+    business_desc_map = {}
+    for hit in results:
+        code = hit["code"]
+        name = name_map.get(code, "")
+        if not name:
+            continue
+        desc = fetch_business_desc(name, sector_name=sector_map.get(code, ""))
+        if desc:
+            business_desc_map[code] = desc
+        time.sleep(0.3)
+    with open(OUTPUT_DIR / "jquants_business_desc.json", "w", encoding="utf-8") as f:
+        json.dump(business_desc_map, f, ensure_ascii=False, indent=2)
+    print(f"事業内容 {len(business_desc_map)}/{len(results)}件を保存しました。")
 
     clear_checkpoint()
     if PROGRESS_PATH.exists():
