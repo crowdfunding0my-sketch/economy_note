@@ -653,6 +653,29 @@ FREDの株価指数データには約1日の遅延があり、当日朝7時の�
   時間帯は実行されない点に注意（現状はこれで運用、必要になれば「ログオンしていなくても実行」への
   変更を検討）。
 
+**日次実行ラッパーのgit pullが正常時にも即クラッシュする不具合・修正済み（2026-09-09）**
+- 2026-09-08に追加したログ出力・終了コード伝播対応で、`$ErrorActionPreference="Stop"`の状態で
+  `git pull`の出力を`*>&1`（stderrをstdoutにマージ）してパイプしたところ、gitが正常時にも
+  stderrへ書く定型メッセージ（"From https://..."等）まで終端エラー（`NativeCommandError`）として
+  扱われ、git pull成功時でも即座に例外でスクリプト全体が落ちる不具合が発生した（2026-09-09朝の
+  自動実行が本文生成まで到達しなかった原因）。ネイティブexeのstderrを`2>&1`/`*>&1`でマージしつつ
+  `$ErrorActionPreference="Stop"`を使うのは危険なため、`$ErrorActionPreference`は既定の
+  `Continue`に戻し、失敗検知は`$LASTEXITCODE`の明示チェックのみで行うように修正した
+  （詳細は[scripts/run_daily.ps1](scripts/run_daily.ps1)のコメント参照）。
+
+**外部APIの一時的な5xxエラーで日次実行全体が失敗する不具合・修正済み（2026-09-10）**
+- 2026-09-10朝の自動実行が、FRED（DJIA系列）の一時的な502 Bad Gatewayエラーで例外終了し、
+  記事下書きが一切生成されなかった（他の指標・記事本体はFREDの一時障害と無関係のはずなのに、
+  1系列の一時的な不調で1日分の記事が丸ごと失われた）。前日の`git pull`クラッシュとは別原因だが、
+  「日次実行の中の1箇所の失敗が全体を巻き込んで止める」という同種の脆さだったため、
+  [src/fetchers/http_utils.py](src/fetchers/http_utils.py)に`get_with_retry`/`post_with_retry`
+  （5xx・タイムアウト・接続エラー時に最大3回まで指数バックオフで再試行、4xxは即座に諦める）を追加し、
+  日次実行の中核である`market_calendar.py`・`fred_indicators.py`・`bls_indicators.py`・
+  `fed_press_releases.py`・`fx_indicators.py`のリクエストをこれ経由に統一した。
+  `jquants_screener.py`（週次〜月次の長時間スキャン）・`alpaca_price_trend.py`（サムネイル生成用）は
+  今回のスコープ外（前者は既に独自のページネーション安全策・エラーハンドリングを持つため、
+  後者は失敗しても記事本体の生成自体はブロックしないため）。
+
 ---
 
 ## 5. 今後のタスク

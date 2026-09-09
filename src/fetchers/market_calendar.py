@@ -32,6 +32,8 @@ import jpholiday
 import requests
 from dotenv import load_dotenv
 
+from http_utils import get_with_retry
+
 load_dotenv()
 
 ALPACA_TRADING_URL = "https://paper-api.alpaca.markets"
@@ -47,7 +49,7 @@ JP_EXTRA_MARKET_HOLIDAYS_MMDD = {(12, 31), (1, 2), (1, 3)}
 def is_us_market_open(target_date):
     """指定日がNYSEの取引日かどうかをAlpacaの取引カレンダーAPIで判定する"""
     date_str = target_date.isoformat()
-    resp = requests.get(
+    resp = get_with_retry(
         f"{ALPACA_TRADING_URL}/v2/calendar",
         headers=ALPACA_HEADERS,
         params={"start": date_str, "end": date_str},

@@ -36,6 +36,8 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
+from http_utils import get_with_retry
+
 load_dotenv()
 
 FRED_API_KEY = os.environ.get("FRED_API_KEY", "")
@@ -53,7 +55,7 @@ FRED_SERIES = {
 
 
 def fetch_fred_observations(series_id, limit=15):
-    resp = requests.get(FRED_URL, params={
+    resp = get_with_retry(FRED_URL, params={
         "series_id": series_id,
         "api_key": FRED_API_KEY,
         "file_type": "json",
@@ -123,7 +125,7 @@ def fetch_jpy_futures_positioning():
     別契約の「EURO FX/JAPANESE YEN XRATE」（ユーロ円クロス先物）まで拾ってしまい、
     同じ日付で異なる契約の行が混ざって集計を誤るバグがあったため（実機で確認済み）。
     """
-    resp = requests.get(CFTC_URL, params={
+    resp = get_with_retry(CFTC_URL, params={
         "$where": "market_and_exchange_names = 'JAPANESE YEN - CHICAGO MERCANTILE EXCHANGE'",
         "$order": "report_date_as_yyyy_mm_dd DESC",
         "$limit": 2,

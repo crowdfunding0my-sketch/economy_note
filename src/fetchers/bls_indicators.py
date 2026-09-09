@@ -38,6 +38,8 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
+from http_utils import post_with_retry
+
 load_dotenv()
 
 BLS_API_KEY = os.environ.get("BLS_API_KEY", "")
@@ -63,7 +65,7 @@ def fetch_series(series_ids, start_year=None, end_year=None):
         payload["startyear"] = str(start_year)
         payload["endyear"] = str(end_year)
 
-    resp = requests.post(
+    resp = post_with_retry(
         BLS_URL,
         data=json.dumps(payload),
         headers={"Content-type": "application/json"},

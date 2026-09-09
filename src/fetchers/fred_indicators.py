@@ -33,6 +33,8 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
+from http_utils import get_with_retry
+
 load_dotenv()
 
 FRED_API_KEY = os.environ.get("FRED_API_KEY", "")
@@ -56,7 +58,7 @@ SERIES = [
 
 def fetch_observations(series_id, limit=20):
     """指定系列の直近limit件を新しい順で取得（欠測(.)を除く）"""
-    resp = requests.get(FRED_URL, params={
+    resp = get_with_retry(FRED_URL, params={
         "series_id": series_id,
         "api_key": FRED_API_KEY,
         "file_type": "json",

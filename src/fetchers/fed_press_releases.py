@@ -31,6 +31,8 @@ from pathlib import Path
 
 import requests
 
+from http_utils import get_with_retry
+
 # FRBの発表タイトルにはWindowsのコンソール既定コードページ(cp932)で表現できない記号
 # （enダッシュ等）が含まれることがあり、print()がそのままだと落ちる。UTF-8に強制する。
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
@@ -48,7 +50,7 @@ STATE_PATH = PROJECT_ROOT / "output" / "fed_press_release_state.json"
 
 
 def fetch_items(feed_url, limit=10):
-    resp = requests.get(feed_url, headers=HEADERS, timeout=20)
+    resp = get_with_retry(feed_url, headers=HEADERS, timeout=20)
     resp.raise_for_status()
     root = ET.fromstring(resp.content)
     items = []
