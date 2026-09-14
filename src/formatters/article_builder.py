@@ -303,7 +303,7 @@ def build_jp_pick_section():
     rows, path = _latest_csv_rows("screening_result_*.csv")
     name_map = _latest_json("jquants_company_names.json") or {}
     business_desc_map = _latest_json("jquants_business_desc.json") or {}
-    lines = ["## 本日の日本株ピックアップ（無料）", ""]
+    lines = ["## 本日の日本株ピックアップ", ""]
     if rows is None:
         lines.append("（スクリーニング未実行のため、まだ候補がありません。"
                       "`python src/fetchers/jquants_screener.py` の実行後に反映されます）")
@@ -358,7 +358,7 @@ def build_jp_pick_section():
 
 def build_us_pick_teaser(candidates_data, state):
     if not candidates_data or not state:
-        return "## 本日の米国株ピック（有料エリア）\n\n（候補データ未準備）\n"
+        return "## 本日の米国株ピック\n\n（候補データ未準備）\n"
 
     stock = _todays_stock(candidates_data, state)
 
@@ -367,7 +367,7 @@ def build_us_pick_teaser(candidates_data, state):
     price_change_pct = stock["price_change_rate_2y"] * 100
 
     lines = [
-        "## 本日の米国株ピック（有料エリア）",
+        "## 本日の米国株ピック",
         "",
         f"取引可能な米国株1,056銘柄を「過去2年の株価トレンド」「売上成長」「時価総額150億ドル以下」で"
         f"スクリーニングし、最終的に生き残ったのは**わずか15銘柄**でした。本日はその中から1銘柄を深掘りします。",
