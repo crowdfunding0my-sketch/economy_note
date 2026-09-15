@@ -274,8 +274,7 @@ def build_fed_section(fed):
         lines.append(f"- [{chair_speeches[0]['title']}]({chair_speeches[0]['link']})（{chair_speeches[0]['pub_date']}）")
 
     lines.append("")
-    lines.append("> 出典：FRB公式サイト（federalreserve.gov）のプレスリリース・講演RSSフィードより。"
-                  "解説記事より先に一次発表そのものを参照する方針です。")
+    lines.append("> 出典：FRB公式サイト（federalreserve.gov）のプレスリリース・講演RSSフィードより。")
     lines.append("")
     return "\n".join(lines)
 
