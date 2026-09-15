@@ -315,8 +315,7 @@ def build_jp_pick_section():
         lines.append("")
         return "\n".join(lines)
 
-    lines.append(f"（{scan_date} 実行のスクリーニング結果より。小型株・直近期の売上高成長・"
-                  f"PER15倍以下（黒字）・株価トレンド上昇を満たした{len(rows)}銘柄の中から、"
+    lines.append(f"（株価トレンド上昇を満たした{len(rows)}銘柄の中から、"
                   f"日替わりで{JP_PICKS_SHOWN}件を紹介します）")
     lines.append("")
     # 2026-09-08: J-Quants Freeプランは直近12週間分のデータを取得できない制約があり、
