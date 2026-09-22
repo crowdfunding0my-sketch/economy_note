@@ -187,6 +187,31 @@ def translate_to_japanese(text):
         return None
 
 
+def generate_teaser(title, summary):
+    """ニュース記事の要約（Alpha Vantage提供、英語）をGoogle翻訳（無料・非公式、deep-translator
+    経由）で日本語化し、最初の1文だけを一行要約として使う。
+
+    2026-09-22: 当初はClaude（Haiku）にタイトル・要約から「思わずクリックしたくなる」煽り文を
+    書かせる実装にしていたが、Anthropic APIのクレジット残高不足で利用できなかったため、
+    ユーザーの指示により無料の機械翻訳ベースに変更した。翻訳文をそのまま使うため、
+    Claude版に比べて煽り度は控えめ（事実ベースの要約の最初の1文）になる。
+    翻訳失敗時・要約が無い場合はNoneを返す（呼び出し側でテイザー行を省略するだけで、
+    記事生成自体は止めない）。
+    """
+    text = summary or title
+    if not text:
+        return None
+    translated = translate_to_japanese(text)
+    if not translated:
+        return None
+    first_sentence = translated.split("。")[0].strip()
+    if not first_sentence:
+        return None
+    if len(first_sentence) > 80:
+        first_sentence = first_sentence[:80]
+    return first_sentence + "。"
+
+
 def build_business_section(stock, overview):
     """「事業内容」セクションを組み立てる。
 
@@ -265,7 +290,10 @@ def format_draft(stock, news_items, overview):
             source = item.get("source", "")
             time_published = item.get("time_published", "")
             url = item.get("url", "")
+            teaser = generate_teaser(title, item.get("summary", ""))
             lines.append(f"- [{title}]({url})（{source}, {time_published}）")
+            if teaser:
+                lines.append(f"　　→ {teaser}")
     else:
         lines.append("- （ニュース取得なし、または該当なし）")
 
