@@ -725,6 +725,17 @@ FREDの株価指数データには約1日の遅延があり、当日朝7時の�
 その曜日の自動実行自体が抜けた場合に整理も止まってしまうため、曜日を限定せず
 `main.py`実行のたびに日付ベースでチェックする方式にした。
 
+**対象をJSON・CSVにも拡大（2026-09-23）**：「他のJSONファイルも不要では」との指摘を受け、
+FRED/BLS/FRB発表/FX指標の日付付きJSON（`fred_indicators_*.json`等）と日本株スクリーニング
+結果CSV（`screening_result_*.csv`）も対象に追加した。ただしこれらは`article_builder.py`の
+`_latest_json()`/`_latest_csv_rows()`が「そのパターンの最新ファイル」を毎回読みに行く
+フォールバック依存の仕組みのため、**各パターンの最新1件は日付に関わらず必ず残す**安全策を
+入れている（万一当日分の取得が何日も失敗し続けた場合でも、フォールバック先まで消えて
+記事生成自体が止まることを防ぐため）。状態ファイル（`bls_release_state.json`・
+`fed_press_release_state.json`・`rotation_state.json`）や、日付を含まない固定名の
+永続キャッシュ・候補リスト（`jquants_company_names.json`・`us_premium_rotation_candidates.json`等）は
+対象外（ファイル名に日付パターンが無いため、そもそも正規表現にマッチしない）。
+
 ---
 
 ## 5. 今後のタスク
