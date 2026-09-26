@@ -12,12 +12,12 @@
   {
     "symbol": "AXTI",
     "latest_close": 79.01,
-    "trend_slope": 0.1725,
+    "trend_slope": 0.1731,
     "trend_r2": 0.619,
-    "price_change_rate": 27.4721,
-    "period_start": "2024-08-26",
+    "price_change_rate": 28.8151,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "MUU",
@@ -32,42 +32,52 @@
   {
     "symbol": "BE",
     "latest_close": 288.635,
-    "trend_slope": 0.5617,
-    "trend_r2": 0.818,
-    "price_change_rate": 23.2959,
-    "period_start": "2024-08-26",
+    "trend_slope": 0.563,
+    "trend_r2": 0.819,
+    "price_change_rate": 23.5229,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "RGTI",
     "latest_close": 16.64,
-    "trend_slope": 0.0356,
-    "trend_r2": 0.312,
-    "price_change_rate": 16.5139,
-    "period_start": "2024-08-26",
+    "trend_slope": 0.0355,
+    "trend_r2": 0.309,
+    "price_change_rate": 17.2216,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "QBTS",
     "latest_close": 17.4,
-    "trend_slope": 0.045,
-    "trend_r2": 0.527,
-    "price_change_rate": 16.4,
-    "period_start": "2024-08-26",
+    "trend_slope": 0.0449,
+    "trend_r2": 0.525,
+    "price_change_rate": 16.6488,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "LITE",
     "latest_close": 941.415,
-    "trend_slope": 1.9626,
-    "trend_r2": 0.794,
-    "price_change_rate": 15.6799,
-    "period_start": "2024-08-26",
+    "trend_slope": 1.9676,
+    "trend_r2": 0.795,
+    "price_change_rate": 15.3838,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
+  },
+  {
+    "symbol": "RKLB",
+    "latest_close": 73.935,
+    "trend_slope": 0.1748,
+    "trend_r2": 0.76,
+    "price_change_rate": 11.0809,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
   },
   {
     "symbol": "NBIS",
@@ -100,374 +110,384 @@
     "data_points": 405
   },
   {
-    "symbol": "RKLB",
-    "latest_close": 73.935,
-    "trend_slope": 0.1748,
-    "trend_r2": 0.761,
-    "price_change_rate": 9.9696,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
     "symbol": "MU",
     "latest_close": 1082.01,
-    "trend_slope": 1.8008,
+    "trend_slope": 1.8061,
     "trend_r2": 0.721,
-    "price_change_rate": 9.9404,
-    "period_start": "2024-08-26",
+    "price_change_rate": 10.0578,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "AAOI",
     "latest_close": 101.32,
-    "trend_slope": 0.2593,
+    "trend_slope": 0.2597,
     "trend_r2": 0.581,
-    "price_change_rate": 9.5213,
-    "period_start": "2024-08-26",
+    "price_change_rate": 10.037,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "BFLY",
     "latest_close": 9.38,
     "trend_slope": 0.0097,
-    "trend_r2": 0.509,
-    "price_change_rate": 8.4747,
-    "period_start": "2024-08-26",
+    "trend_r2": 0.507,
+    "price_change_rate": 8.6601,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
+  },
+  {
+    "symbol": "STX",
+    "latest_close": 916.755,
+    "trend_slope": 1.6887,
+    "trend_r2": 0.77,
+    "price_change_rate": 8.1011,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
   },
   {
     "symbol": "ONDS",
     "latest_close": 7.635,
     "trend_slope": 0.0226,
     "trend_r2": 0.717,
-    "price_change_rate": 7.8945,
-    "period_start": "2024-08-26",
+    "price_change_rate": 7.8225,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "STX",
-    "latest_close": 916.755,
-    "trend_slope": 1.6839,
-    "trend_r2": 0.769,
-    "price_change_rate": 7.7485,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "AMPX",
     "latest_close": 9.77,
     "trend_slope": 0.0318,
-    "trend_r2": 0.697,
-    "price_change_rate": 7.4957,
-    "period_start": "2024-08-26",
+    "trend_r2": 0.696,
+    "price_change_rate": 7.7232,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "ALAB",
-    "latest_close": 364.48,
-    "trend_slope": 0.4992,
-    "trend_r2": 0.645,
-    "price_change_rate": 7.4684,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "DAVE",
     "latest_close": 324.74,
-    "trend_slope": 0.5897,
-    "trend_r2": 0.803,
-    "price_change_rate": 7.1491,
-    "period_start": "2024-08-26",
+    "trend_slope": 0.5898,
+    "trend_r2": 0.802,
+    "price_change_rate": 7.6482,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "HUT",
     "latest_close": 96.85,
-    "trend_slope": 0.1902,
+    "trend_slope": 0.1906,
     "trend_r2": 0.763,
-    "price_change_rate": 7.0108,
-    "period_start": "2024-08-26",
+    "price_change_rate": 7.6165,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
+  },
+  {
+    "symbol": "ALAB",
+    "latest_close": 364.48,
+    "trend_slope": 0.4995,
+    "trend_r2": 0.644,
+    "price_change_rate": 7.1557,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
   },
   {
     "symbol": "MXL",
     "latest_close": 93.84,
-    "trend_slope": 0.1235,
+    "trend_slope": 0.1239,
     "trend_r2": 0.482,
-    "price_change_rate": 6.7362,
-    "period_start": "2024-08-26",
+    "price_change_rate": 6.9391,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "WDC",
-    "latest_close": 456.61,
-    "trend_slope": 1.023,
-    "trend_r2": 0.745,
-    "price_change_rate": 6.2859,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "VICR",
     "latest_close": 281.775,
-    "trend_slope": 0.4873,
-    "trend_r2": 0.7,
-    "price_change_rate": 6.2763,
-    "period_start": "2024-08-26",
+    "trend_slope": 0.4884,
+    "trend_r2": 0.701,
+    "price_change_rate": 6.3322,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "CLS",
     "latest_close": 365.5,
-    "trend_slope": 0.7085,
+    "trend_slope": 0.709,
     "trend_r2": 0.867,
-    "price_change_rate": 6.1681,
-    "period_start": "2024-08-26",
+    "price_change_rate": 6.2664,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
+  },
+  {
+    "symbol": "WDC",
+    "latest_close": 456.61,
+    "trend_slope": 1.026,
+    "trend_r2": 0.746,
+    "price_change_rate": 6.2639,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
   },
   {
     "symbol": "UAMY",
     "latest_close": 4.5,
     "trend_slope": 0.0168,
-    "trend_r2": 0.581,
-    "price_change_rate": 6.1429,
-    "period_start": "2024-08-26",
+    "trend_r2": 0.579,
+    "price_change_rate": 6.0978,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "AEHR",
     "latest_close": 104.26,
-    "trend_slope": 0.1786,
-    "trend_r2": 0.671,
-    "price_change_rate": 5.9833,
-    "period_start": "2024-08-26",
+    "trend_slope": 0.1792,
+    "trend_r2": 0.672,
+    "price_change_rate": 6.0637,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "GH",
     "latest_close": 177.335,
-    "trend_slope": 0.2706,
+    "trend_slope": 0.2711,
     "trend_r2": 0.868,
-    "price_change_rate": 5.6318,
-    "period_start": "2024-08-26",
+    "price_change_rate": 5.7815,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "AMDL",
-    "latest_close": 84.4,
-    "trend_slope": 0.0982,
-    "trend_r2": 0.54,
-    "price_change_rate": 5.4823,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "TTMI",
-    "latest_close": 129.15,
-    "trend_slope": 0.2988,
-    "trend_r2": 0.793,
-    "price_change_rate": 5.4031,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "PL",
     "latest_close": 17.415,
-    "trend_slope": 0.0655,
+    "trend_slope": 0.0657,
     "trend_r2": 0.691,
-    "price_change_rate": 5.3327,
-    "period_start": "2024-08-26",
+    "price_change_rate": 5.75,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
-    "symbol": "CIEN",
-    "latest_close": 356.57,
-    "trend_slope": 0.9258,
-    "trend_r2": 0.762,
-    "price_change_rate": 5.2743,
-    "period_start": "2024-08-26",
+    "symbol": "TTMI",
+    "latest_close": 129.15,
+    "trend_slope": 0.2995,
+    "trend_r2": 0.793,
+    "price_change_rate": 5.4769,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
+  },
+  {
+    "symbol": "AMDL",
+    "latest_close": 84.4,
+    "trend_slope": 0.0986,
+    "trend_r2": 0.541,
+    "price_change_rate": 5.4134,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
   },
   {
     "symbol": "QURE",
     "latest_close": 38.215,
-    "trend_slope": 0.0659,
-    "trend_r2": 0.459,
-    "price_change_rate": 5.2443,
-    "period_start": "2024-08-26",
+    "trend_slope": 0.066,
+    "trend_r2": 0.457,
+    "price_change_rate": 5.2957,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
-    "symbol": "PLTR",
-    "latest_close": 189.63,
-    "trend_slope": 0.2301,
-    "trend_r2": 0.568,
-    "price_change_rate": 5.1468,
-    "period_start": "2024-08-26",
+    "symbol": "CIEN",
+    "latest_close": 356.57,
+    "trend_slope": 0.9279,
+    "trend_r2": 0.762,
+    "price_change_rate": 5.2518,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "INTC",
-    "latest_close": 122.98,
-    "trend_slope": 0.1833,
-    "trend_r2": 0.681,
-    "price_change_rate": 5.1032,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "IONQ",
     "latest_close": 45.5,
-    "trend_slope": 0.0548,
-    "trend_r2": 0.309,
-    "price_change_rate": 5.0505,
-    "period_start": "2024-08-26",
+    "trend_slope": 0.0544,
+    "trend_r2": 0.306,
+    "price_change_rate": 5.25,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "CRDO",
-    "latest_close": 210.86,
-    "trend_slope": 0.3884,
-    "trend_r2": 0.783,
-    "price_change_rate": 4.9835,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "SATL",
     "latest_close": 6.18,
     "trend_slope": 0.0079,
-    "trend_r2": 0.412,
-    "price_change_rate": 4.9423,
-    "period_start": "2024-08-26",
+    "trend_r2": 0.41,
+    "price_change_rate": 5.18,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
+  },
+  {
+    "symbol": "PLTR",
+    "latest_close": 189.63,
+    "trend_slope": 0.2293,
+    "trend_r2": 0.566,
+    "price_change_rate": 5.1488,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "INTC",
+    "latest_close": 122.98,
+    "trend_slope": 0.1838,
+    "trend_r2": 0.682,
+    "price_change_rate": 5.1276,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "CRDO",
+    "latest_close": 210.86,
+    "trend_slope": 0.3888,
+    "trend_r2": 0.782,
+    "price_change_rate": 4.9565,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
   },
   {
     "symbol": "OUST",
     "latest_close": 43.76,
     "trend_slope": 0.0679,
     "trend_r2": 0.721,
-    "price_change_rate": 4.7617,
-    "period_start": "2024-08-26",
+    "price_change_rate": 4.8425,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "HOOD",
-    "latest_close": 119.395,
-    "trend_slope": 0.1639,
-    "trend_r2": 0.495,
-    "price_change_rate": 4.6936,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "SEI",
     "latest_close": 70.9,
-    "trend_slope": 0.1163,
-    "trend_r2": 0.839,
-    "price_change_rate": 4.6181,
-    "period_start": "2024-08-26",
+    "trend_slope": 0.1164,
+    "trend_r2": 0.838,
+    "price_change_rate": 4.7131,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "KORU",
-    "latest_close": 21.6,
-    "trend_slope": 0.0615,
-    "trend_r2": 0.574,
-    "price_change_rate": 4.4477,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "IREN",
     "latest_close": 44.13,
-    "trend_slope": 0.1038,
+    "trend_slope": 0.1039,
     "trend_r2": 0.658,
-    "price_change_rate": 4.4314,
-    "period_start": "2024-08-26",
+    "price_change_rate": 4.6145,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
-    "symbol": "PRAX",
-    "latest_close": 280.905,
-    "trend_slope": 0.7189,
-    "trend_r2": 0.744,
-    "price_change_rate": 4.3844,
-    "period_start": "2024-08-26",
+    "symbol": "HOOD",
+    "latest_close": 119.395,
+    "trend_slope": 0.1636,
+    "trend_r2": 0.493,
+    "price_change_rate": 4.5923,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "APLD",
     "latest_close": 26.255,
-    "trend_slope": 0.0698,
-    "trend_r2": 0.721,
-    "price_change_rate": 4.3364,
-    "period_start": "2024-08-26",
+    "trend_slope": 0.0699,
+    "trend_r2": 0.72,
+    "price_change_rate": 4.5625,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
+  },
+  {
+    "symbol": "KORU",
+    "latest_close": 21.6,
+    "trend_slope": 0.0616,
+    "trend_r2": 0.575,
+    "price_change_rate": 4.3825,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "PRAX",
+    "latest_close": 280.905,
+    "trend_slope": 0.7206,
+    "trend_r2": 0.744,
+    "price_change_rate": 4.2946,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "ERAS",
+    "latest_close": 14.26,
+    "trend_slope": 0.0344,
+    "trend_r2": 0.658,
+    "price_change_rate": 4.2426,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
   },
   {
     "symbol": "GEV",
     "latest_close": 957.175,
-    "trend_slope": 1.723,
+    "trend_slope": 1.7234,
     "trend_r2": 0.913,
-    "price_change_rate": 4.2586,
-    "period_start": "2024-08-26",
+    "price_change_rate": 4.1555,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
+  },
+  {
+    "symbol": "KOPN",
+    "latest_close": 4.98,
+    "trend_slope": 0.0078,
+    "trend_r2": 0.768,
+    "price_change_rate": 4.1103,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "DELL",
+    "latest_close": 563.28,
+    "trend_slope": 0.6005,
+    "trend_r2": 0.537,
+    "price_change_rate": 4.0365,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
   },
   {
     "symbol": "AEVA",
     "latest_close": 15.35,
     "trend_slope": 0.0336,
-    "trend_r2": 0.451,
-    "price_change_rate": 4.1858,
-    "period_start": "2024-08-26",
+    "trend_r2": 0.449,
+    "price_change_rate": 4.0328,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "DELL",
-    "latest_close": 563.28,
-    "trend_slope": 0.5986,
-    "trend_r2": 0.537,
-    "price_change_rate": 4.0446,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "MVLL",
@@ -480,123 +500,1003 @@
     "data_points": 389
   },
   {
-    "symbol": "ERAS",
-    "latest_close": 14.26,
-    "trend_slope": 0.0343,
-    "trend_r2": 0.657,
-    "price_change_rate": 3.9257,
-    "period_start": "2024-08-26",
+    "symbol": "XMTR",
+    "latest_close": 100.5,
+    "trend_slope": 0.1377,
+    "trend_r2": 0.767,
+    "price_change_rate": 3.952,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "SMTC",
-    "latest_close": 182.3,
-    "trend_slope": 0.2119,
-    "trend_r2": 0.689,
-    "price_change_rate": 3.923,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "FIX",
     "latest_close": 1657.03,
-    "trend_slope": 3.3395,
+    "trend_slope": 3.3458,
     "trend_r2": 0.862,
-    "price_change_rate": 3.9107,
-    "period_start": "2024-08-26",
+    "price_change_rate": 3.9367,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "XMTR",
-    "latest_close": 100.5,
-    "trend_slope": 0.1376,
-    "trend_r2": 0.768,
-    "price_change_rate": 3.9072,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "KOPN",
-    "latest_close": 4.98,
-    "trend_slope": 0.0078,
-    "trend_r2": 0.768,
-    "price_change_rate": 3.835,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "VIAV",
-    "latest_close": 40.69,
-    "trend_slope": 0.0791,
-    "trend_r2": 0.717,
-    "price_change_rate": 3.7591,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "AGX",
-    "latest_close": 365.15,
-    "trend_slope": 1.1157,
-    "trend_r2": 0.791,
-    "price_change_rate": 3.7299,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "ABCL",
     "latest_close": 12.72,
     "trend_slope": 0.0106,
     "trend_r2": 0.49,
-    "price_change_rate": 3.7111,
-    "period_start": "2024-08-26",
+    "price_change_rate": 3.8642,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
+  },
+  {
+    "symbol": "SMTC",
+    "latest_close": 182.3,
+    "trend_slope": 0.2123,
+    "trend_r2": 0.688,
+    "price_change_rate": 3.7748,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "VIAV",
+    "latest_close": 40.69,
+    "trend_slope": 0.0792,
+    "trend_r2": 0.717,
+    "price_change_rate": 3.7702,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "AGX",
+    "latest_close": 365.15,
+    "trend_slope": 1.1169,
+    "trend_r2": 0.79,
+    "price_change_rate": 3.7639,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "CIFR",
+    "latest_close": 17.725,
+    "trend_slope": 0.0407,
+    "trend_r2": 0.728,
+    "price_change_rate": 3.7267,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
   },
   {
     "symbol": "CELC",
     "latest_close": 79.55,
-    "trend_slope": 0.2521,
+    "trend_slope": 0.2527,
     "trend_r2": 0.76,
-    "price_change_rate": 3.5561,
-    "period_start": "2024-08-26",
+    "price_change_rate": 3.6904,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "SITM",
     "latest_close": 661.2,
-    "trend_slope": 1.0287,
+    "trend_slope": 1.0305,
     "trend_r2": 0.74,
-    "price_change_rate": 3.5512,
-    "period_start": "2024-08-26",
+    "price_change_rate": 3.6241,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
-  },
-  {
-    "symbol": "TWLO",
-    "latest_close": 275.82,
-    "trend_slope": 0.2529,
-    "trend_r2": 0.669,
-    "price_change_rate": 3.5455,
-    "period_start": "2024-08-26",
-    "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
   },
   {
     "symbol": "ECHO",
     "latest_close": 90.1,
-    "trend_slope": 0.2285,
+    "trend_slope": 0.2289,
     "trend_r2": 0.742,
-    "price_change_rate": 3.5276,
-    "period_start": "2024-08-26",
+    "price_change_rate": 3.6063,
+    "period_start": "2024-08-27",
     "period_end": "2026-09-25",
-    "data_points": 523
+    "data_points": 522
+  },
+  {
+    "symbol": "BTSG",
+    "latest_close": 56.62,
+    "trend_slope": 0.1041,
+    "trend_r2": 0.861,
+    "price_change_rate": 3.4724,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "TWLO",
+    "latest_close": 275.82,
+    "trend_slope": 0.2528,
+    "trend_r2": 0.668,
+    "price_change_rate": 3.4487,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "VSAT",
+    "latest_close": 73.1,
+    "trend_slope": 0.1509,
+    "trend_r2": 0.869,
+    "price_change_rate": 3.4036,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "STRL",
+    "latest_close": 512.27,
+    "trend_slope": 1.1466,
+    "trend_r2": 0.721,
+    "price_change_rate": 3.3635,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "NET",
+    "latest_close": 348.68,
+    "trend_slope": 0.3788,
+    "trend_r2": 0.82,
+    "price_change_rate": 3.2907,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "AMD",
+    "latest_close": 630.47,
+    "trend_slope": 0.7699,
+    "trend_r2": 0.672,
+    "price_change_rate": 3.1875,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "FSLY",
+    "latest_close": 24.935,
+    "trend_slope": 0.0364,
+    "trend_r2": 0.603,
+    "price_change_rate": 3.1697,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "GSAT",
+    "latest_close": 82.875,
+    "trend_slope": 0.151,
+    "trend_r2": 0.85,
+    "price_change_rate": 3.0466,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "NVTS",
+    "latest_close": 12.19,
+    "trend_slope": 0.0306,
+    "trend_r2": 0.631,
+    "price_change_rate": 2.945,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "SOXL",
+    "latest_close": 151.3,
+    "trend_slope": 0.2769,
+    "trend_r2": 0.515,
+    "price_change_rate": 2.9238,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "BELFB",
+    "latest_close": 253.935,
+    "trend_slope": 0.4814,
+    "trend_r2": 0.875,
+    "price_change_rate": 2.8745,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "LRCX",
+    "latest_close": 315.19,
+    "trend_slope": 0.5806,
+    "trend_r2": 0.838,
+    "price_change_rate": 2.8438,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "MP",
+    "latest_close": 48.85,
+    "trend_slope": 0.1011,
+    "trend_r2": 0.56,
+    "price_change_rate": 2.8194,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "WBD",
+    "latest_close": 30.855,
+    "trend_slope": 0.0514,
+    "trend_r2": 0.845,
+    "price_change_rate": 2.7999,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "TXG",
+    "latest_close": 85.75,
+    "trend_slope": 0.0638,
+    "trend_r2": 0.423,
+    "price_change_rate": 2.7968,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "TMC",
+    "latest_close": 3.935,
+    "trend_slope": 0.0097,
+    "trend_r2": 0.401,
+    "price_change_rate": 2.7837,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "MRVL",
+    "latest_close": 261.8,
+    "trend_slope": 0.2724,
+    "trend_r2": 0.445,
+    "price_change_rate": 2.7556,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "CRWD",
+    "latest_close": 252.1,
+    "trend_slope": 0.2158,
+    "trend_r2": 0.647,
+    "price_change_rate": 2.7359,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "JNUG",
+    "latest_close": 169.09,
+    "trend_slope": 0.3814,
+    "trend_r2": 0.577,
+    "price_change_rate": 2.7335,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "LEU",
+    "latest_close": 147.095,
+    "trend_slope": 0.3325,
+    "trend_r2": 0.34,
+    "price_change_rate": 2.7291,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "COHR",
+    "latest_close": 295.78,
+    "trend_slope": 0.5885,
+    "trend_r2": 0.74,
+    "price_change_rate": 2.7212,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "GLW",
+    "latest_close": 156.58,
+    "trend_slope": 0.3044,
+    "trend_r2": 0.795,
+    "price_change_rate": 2.6821,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "OSS",
+    "latest_close": 9.285,
+    "trend_slope": 0.0251,
+    "trend_r2": 0.74,
+    "price_change_rate": 2.6128,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "FLEX",
+    "latest_close": 114.65,
+    "trend_slope": 0.1942,
+    "trend_r2": 0.722,
+    "price_change_rate": 2.5567,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "INOD",
+    "latest_close": 69.2,
+    "trend_slope": 0.0873,
+    "trend_r2": 0.443,
+    "price_change_rate": 2.5524,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "WULF",
+    "latest_close": 15.74,
+    "trend_slope": 0.0383,
+    "trend_r2": 0.725,
+    "price_change_rate": 2.49,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "LASR",
+    "latest_close": 40.33,
+    "trend_slope": 0.1323,
+    "trend_r2": 0.777,
+    "price_change_rate": 2.4797,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "NTRA",
+    "latest_close": 412.35,
+    "trend_slope": 0.3106,
+    "trend_r2": 0.708,
+    "price_change_rate": 2.4243,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "NUGT",
+    "latest_close": 165.78,
+    "trend_slope": 0.3518,
+    "trend_r2": 0.614,
+    "price_change_rate": 2.3846,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "PTGX",
+    "latest_close": 141.865,
+    "trend_slope": 0.2059,
+    "trend_r2": 0.86,
+    "price_change_rate": 2.3554,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "FROG",
+    "latest_close": 89.22,
+    "trend_slope": 0.1133,
+    "trend_r2": 0.753,
+    "price_change_rate": 2.2965,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "HPE",
+    "latest_close": 62.94,
+    "trend_slope": 0.057,
+    "trend_r2": 0.544,
+    "price_change_rate": 2.2953,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "SANM",
+    "latest_close": 224.78,
+    "trend_slope": 0.3339,
+    "trend_r2": 0.818,
+    "price_change_rate": 2.2596,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "MRAM",
+    "latest_close": 18.455,
+    "trend_slope": 0.0312,
+    "trend_r2": 0.521,
+    "price_change_rate": 2.2549,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "VRT",
+    "latest_close": 253.24,
+    "trend_slope": 0.4659,
+    "trend_r2": 0.761,
+    "price_change_rate": 2.1576,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "POWL",
+    "latest_close": 189.6,
+    "trend_slope": 0.39,
+    "trend_r2": 0.663,
+    "price_change_rate": 2.1057,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "UI",
+    "latest_close": 563.45,
+    "trend_slope": 0.9643,
+    "trend_r2": 0.585,
+    "price_change_rate": 2.0455,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "ROIV",
+    "latest_close": 35.815,
+    "trend_slope": 0.056,
+    "trend_r2": 0.834,
+    "price_change_rate": 2.0249,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "CDE",
+    "latest_close": 19.225,
+    "trend_slope": 0.035,
+    "trend_r2": 0.729,
+    "price_change_rate": 2.0133,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "USD",
+    "latest_close": 95.4,
+    "trend_slope": 0.1386,
+    "trend_r2": 0.766,
+    "price_change_rate": 1.9915,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "TE",
+    "latest_close": 3.785,
+    "trend_slope": 0.0134,
+    "trend_r2": 0.585,
+    "price_change_rate": 1.9803,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "TER",
+    "latest_close": 398.13,
+    "trend_slope": 0.6496,
+    "trend_r2": 0.734,
+    "price_change_rate": 1.9506,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "JBL",
+    "latest_close": 316.7,
+    "trend_slope": 0.4784,
+    "trend_r2": 0.879,
+    "price_change_rate": 1.9436,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "HL",
+    "latest_close": 18.2,
+    "trend_slope": 0.0358,
+    "trend_r2": 0.676,
+    "price_change_rate": 1.9143,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "RIOT",
+    "latest_close": 23,
+    "trend_slope": 0.0296,
+    "trend_r2": 0.656,
+    "price_change_rate": 1.9114,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "SNOW",
+    "latest_close": 335.97,
+    "trend_slope": 0.2626,
+    "trend_r2": 0.478,
+    "price_change_rate": 1.9081,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "AIP",
+    "latest_close": 23.88,
+    "trend_slope": 0.0497,
+    "trend_r2": 0.642,
+    "price_change_rate": 1.8945,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "CRVS",
+    "latest_close": 11.61,
+    "trend_slope": 0.0235,
+    "trend_r2": 0.521,
+    "price_change_rate": 1.8667,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "PSNL",
+    "latest_close": 16.46,
+    "trend_slope": 0.0181,
+    "trend_r2": 0.621,
+    "price_change_rate": 1.8576,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "ATI",
+    "latest_close": 185.385,
+    "trend_slope": 0.3164,
+    "trend_r2": 0.851,
+    "price_change_rate": 1.8364,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "TPR",
+    "latest_close": 113.85,
+    "trend_slope": 0.2142,
+    "trend_r2": 0.864,
+    "price_change_rate": 1.8272,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "EWY",
+    "latest_close": 187.06,
+    "trend_slope": 0.2897,
+    "trend_r2": 0.814,
+    "price_change_rate": 1.8242,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "IBKR",
+    "latest_close": 89.245,
+    "trend_slope": 0.1135,
+    "trend_r2": 0.91,
+    "price_change_rate": 1.8064,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "CRS",
+    "latest_close": 396.78,
+    "trend_slope": 0.7843,
+    "trend_r2": 0.862,
+    "price_change_rate": 1.761,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "VLO",
+    "latest_close": 387.095,
+    "trend_slope": 0.3957,
+    "trend_r2": 0.741,
+    "price_change_rate": 1.7479,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "MTSI",
+    "latest_close": 285.46,
+    "trend_slope": 0.4513,
+    "trend_r2": 0.708,
+    "price_change_rate": 1.7346,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "GHM",
+    "latest_close": 87.38,
+    "trend_slope": 0.1594,
+    "trend_r2": 0.85,
+    "price_change_rate": 1.7323,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "LSCC",
+    "latest_close": 128.075,
+    "trend_slope": 0.1757,
+    "trend_r2": 0.753,
+    "price_change_rate": 1.732,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "TECL",
+    "latest_close": 234.97,
+    "trend_slope": 0.2499,
+    "trend_r2": 0.616,
+    "price_change_rate": 1.7309,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "SIL",
+    "latest_close": 91.52,
+    "trend_slope": 0.1491,
+    "trend_r2": 0.808,
+    "price_change_rate": 1.7077,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "UAL",
+    "latest_close": 114,
+    "trend_slope": 0.0877,
+    "trend_r2": 0.49,
+    "price_change_rate": 1.7053,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "MGTX",
+    "latest_close": 10.9,
+    "trend_slope": 0.0138,
+    "trend_r2": 0.741,
+    "price_change_rate": 1.6618,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "GGLL",
+    "latest_close": 99.55,
+    "trend_slope": 0.1949,
+    "trend_r2": 0.753,
+    "price_change_rate": 1.6596,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "BBIO",
+    "latest_close": 65.55,
+    "trend_slope": 0.1244,
+    "trend_r2": 0.893,
+    "price_change_rate": 1.623,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "CAKE",
+    "latest_close": 104.5,
+    "trend_slope": 0.0848,
+    "trend_r2": 0.574,
+    "price_change_rate": 1.5752,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "AEIS",
+    "latest_close": 279.58,
+    "trend_slope": 0.5506,
+    "trend_r2": 0.807,
+    "price_change_rate": 1.5743,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "FORM",
+    "latest_close": 129.67,
+    "trend_slope": 0.1998,
+    "trend_r2": 0.646,
+    "price_change_rate": 1.5599,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "POET",
+    "latest_close": 7.77,
+    "trend_slope": 0.012,
+    "trend_r2": 0.515,
+    "price_change_rate": 1.5392,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "APH",
+    "latest_close": 84.09,
+    "trend_slope": 0.1127,
+    "trend_r2": 0.905,
+    "price_change_rate": 1.5267,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "AMAT",
+    "latest_close": 484.83,
+    "trend_slope": 0.7553,
+    "trend_r2": 0.72,
+    "price_change_rate": 1.4768,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "SMH",
+    "latest_close": 606.56,
+    "trend_slope": 0.7774,
+    "trend_r2": 0.821,
+    "price_change_rate": 1.4757,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "LMND",
+    "latest_close": 44.9,
+    "trend_slope": 0.0857,
+    "trend_r2": 0.53,
+    "price_change_rate": 1.4738,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "EDC",
+    "latest_close": 80.78,
+    "trend_slope": 0.1191,
+    "trend_r2": 0.819,
+    "price_change_rate": 1.4178,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "BKSY",
+    "latest_close": 23.24,
+    "trend_slope": 0.0504,
+    "trend_r2": 0.652,
+    "price_change_rate": 1.4008,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "PWR",
+    "latest_close": 648.99,
+    "trend_slope": 0.89,
+    "trend_r2": 0.835,
+    "price_change_rate": 1.3998,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "HWM",
+    "latest_close": 232.595,
+    "trend_slope": 0.3758,
+    "trend_r2": 0.942,
+    "price_change_rate": 1.3981,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "ANET",
+    "latest_close": 206.49,
+    "trend_slope": 0.1881,
+    "trend_r2": 0.729,
+    "price_change_rate": 1.3919,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "GDX",
+    "latest_close": 92.89,
+    "trend_slope": 0.138,
+    "trend_r2": 0.802,
+    "price_change_rate": 1.3678,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "ARM",
+    "latest_close": 310.38,
+    "trend_slope": 0.2721,
+    "trend_r2": 0.375,
+    "price_change_rate": 1.3655,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "KEYS",
+    "latest_close": 362.235,
+    "trend_slope": 0.4242,
+    "trend_r2": 0.745,
+    "price_change_rate": 1.3514,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "UUUU",
+    "latest_close": 11.38,
+    "trend_slope": 0.0314,
+    "trend_r2": 0.566,
+    "price_change_rate": 1.3416,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "CAT",
+    "latest_close": 821.04,
+    "trend_slope": 1.2599,
+    "trend_r2": 0.816,
+    "price_change_rate": 1.338,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "RMBS",
+    "latest_close": 105.16,
+    "trend_slope": 0.1596,
+    "trend_r2": 0.702,
+    "price_change_rate": 1.3333,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "LGCY",
+    "latest_close": 9.495,
+    "trend_slope": 0.0118,
+    "trend_r2": 0.569,
+    "price_change_rate": 1.3159,
+    "period_start": "2024-09-26",
+    "period_end": "2026-09-25",
+    "data_points": 501
+  },
+  {
+    "symbol": "MPC",
+    "latest_close": 393.26,
+    "trend_slope": 0.3469,
+    "trend_r2": 0.67,
+    "price_change_rate": 1.3149,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "KLAC",
+    "latest_close": 187.92,
+    "trend_slope": 0.3132,
+    "trend_r2": 0.818,
+    "price_change_rate": 1.312,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "DDOG",
+    "latest_close": 268.13,
+    "trend_slope": 0.2048,
+    "trend_r2": 0.442,
+    "price_change_rate": 1.3117,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "TQQQ",
+    "latest_close": 79.58,
+    "trend_slope": 0.0825,
+    "trend_r2": 0.702,
+    "price_change_rate": 1.304,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "NEM",
+    "latest_close": 121.41,
+    "trend_slope": 0.1771,
+    "trend_r2": 0.823,
+    "price_change_rate": 1.3034,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
+  },
+  {
+    "symbol": "WPM",
+    "latest_close": 142.9,
+    "trend_slope": 0.1836,
+    "trend_r2": 0.833,
+    "price_change_rate": 1.2893,
+    "period_start": "2024-08-27",
+    "period_end": "2026-09-25",
+    "data_points": 522
   }
 ]
