@@ -6,14 +6,16 @@
   1. FRED（経済指標の基本データ）
   2. BLS（指標発表日判定込みの速報値）
   3. FRB公式発表（一次情報。RSSフィードから新着を検知）
-  4. 米国株ローテーション（Alpacaの直接APIで取得済みの候補15銘柄から本日の1銘柄を選び、
+  4. 今日の市場ニュース一言（NHK経済カテゴリRSSから、市場を動かした見出しを1件抜粋。
+     詳細はsrc/fetchers/market_news.py参照）
+  5. 米国株ローテーション（Alpacaの直接APIで取得済みの候補15銘柄から本日の1銘柄を選び、
      Alpha Vantageで最新ニュースを取得）
-  5. ドルインデックス・ドル円・クロス円（FRED）＋CFTC投機筋の円先物ポジション（有料エリア）
-  6. 上記を踏まえたnote記事下書きの組み立て（末尾にハッシュタグも自動生成）
-  7. 経済指標テーブルの画像化（note.comはMarkdown表が表示されないため、貼り付け用PNGを別途生成）
-  8. サムネイル画像の生成（記事の内容が確定した後、本日の注目株の分野キーワードでPixabay検索）
-  9. 古い記事下書き・サムネイル・テーブル画像・米国株ピック下書き（7日より古いもの）を
-     output/old/へ移動（削除ではなく移動。詳細はsrc/formatters/archive_old_files.py参照）
+  6. ドルインデックス・ドル円・クロス円（FRED）＋CFTC投機筋の円先物ポジション（有料エリア）
+  7. 上記を踏まえたnote記事下書きの組み立て（末尾にハッシュタグも自動生成）
+  8. 経済指標テーブルの画像化（note.comはMarkdown表が表示されないため、貼り付け用PNGを別途生成）
+  9. サムネイル画像の生成（記事の内容が確定した後、本日の注目株の分野キーワードでPixabay検索）
+  10. 古い記事下書き・サムネイル・テーブル画像・米国株ピック下書き（7日より古いもの）を
+      output/old/へ移動（削除ではなく移動。詳細はsrc/formatters/archive_old_files.py参照）
 
 以下は自動化の対象外（別途手動 or 別の仕組みが必要）:
   - 日本株の全銘柄スクリーニング（J-Quants Freeプランでは全銘柄走査に十数時間かかるため、
@@ -49,6 +51,7 @@ import market_calendar
 import fred_indicators
 import bls_indicators
 import fed_press_releases
+import market_news
 import fx_indicators
 import us_stock_rotation
 import article_builder
@@ -63,22 +66,25 @@ def main():
         print(f"{today} は前日が日米ともに市場休場日で新しい終値情報が無いため、記事生成をスキップします。")
         return
 
-    print("=== 1/9 FRED経済指標を取得 ===")
+    print("=== 1/10 FRED経済指標を取得 ===")
     fred_indicators.run()
 
-    print("\n=== 2/9 BLS経済指標を取得（発表日判定込み） ===")
+    print("\n=== 2/10 BLS経済指標を取得（発表日判定込み） ===")
     bls_indicators.run()
 
-    print("\n=== 3/9 FRB公式発表を取得（新着判定込み） ===")
+    print("\n=== 3/10 FRB公式発表を取得（新着判定込み） ===")
     fed_press_releases.run()
 
-    print("\n=== 4/9 ドル指数・ドル円・クロス円・CFTC円先物ポジションを取得 ===")
+    print("\n=== 4/10 今日の市場ニュース一言を取得 ===")
+    market_news.run()
+
+    print("\n=== 5/10 ドル指数・ドル円・クロス円・CFTC円先物ポジションを取得 ===")
     fx_indicators.run()
 
-    print("\n=== 5/9 本日の米国株ピックを選定・ニュース取得 ===")
+    print("\n=== 6/10 本日の米国株ピックを選定・ニュース取得 ===")
     us_stock_rotation.run()
 
-    print("\n=== 6/9 note記事下書きを組み立て ===")
+    print("\n=== 7/10 note記事下書きを組み立て ===")
     article = article_builder.build_article()
     out_dir = PROJECT_ROOT / "output"
     out_dir.mkdir(exist_ok=True)
@@ -89,13 +95,13 @@ def main():
         f.write(article)
     print(f"記事下書きを保存しました: {out_path}")
 
-    print("\n=== 7/9 経済指標テーブル画像を生成 ===")
+    print("\n=== 8/10 経済指標テーブル画像を生成 ===")
     indicators_table_image.run()
 
-    print("\n=== 8/9 サムネイル画像を生成 ===")
+    print("\n=== 9/10 サムネイル画像を生成 ===")
     thumbnail_generator.run()
 
-    print("\n=== 9/9 古いファイルをoutput/old/へ整理 ===")
+    print("\n=== 10/10 古いファイルをoutput/old/へ整理 ===")
     archive_old_files.run()
 
 

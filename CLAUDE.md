@@ -512,6 +512,23 @@ FRBに新着発表があれば`#FOMC`を動的に追加する。実装：`articl
 実装: [src/fetchers/fx_indicators.py](src/fetchers/fx_indicators.py)（`article_builder.py`の
 「ドルインデックス・ドル円・クロス円動向」セクションに統合、動作確認済み）
 
+### 今日の市場ニュース一言（2026-09-26追加）
+
+FRB発表セクションの上に、「トランプ大統領と習近平氏の会談を受けて円高が進んだ」のような、
+市場を動かしたその日のエピソードを一言添えたいというユーザー要望を受けて追加。
+
+- **検討したがために採用しなかった案**：Alpha Vantage NEWS_SENTIMENT（`topics=economy_macro`等）。
+  既に契約済みで追加コスト無しだが、実際に試すと個別企業のIPO・決算記事が中心で、
+  地政学・為替のような「一言エピソード」向きではなく、英語のため機械翻訳も必要になる。
+- **採用**：NHKニュース経済カテゴリRSS（`https://www3.nhk.or.jp/rss/news/cat5.xml`、
+  無料・認証不要・日本語ネイティブで翻訳失敗リスクが無い）。経済カテゴリ全体には
+  市場と直接関係ない記事（企業の不祥事等）も混在するため、円・ドル・株価・金利など
+  市場関連キーワード（`MARKET_KEYWORDS`）を含む見出しに絞り込んでいる。
+  該当ニュースが無い日はセクション自体を省略する（他の一次情報系フェッチャーと同じ設計方針）。
+
+実装: [src/fetchers/market_news.py](src/fetchers/market_news.py)
+（`article_builder.py`の`build_market_headline_section()`、FRB発表セクションの直前に挿入）
+
 ---
 
 ## 6. 自動実行の仕組み（方針決定・実装済み）

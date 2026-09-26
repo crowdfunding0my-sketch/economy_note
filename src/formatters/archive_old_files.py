@@ -50,6 +50,7 @@ TARGETS = [
     ("bls_indicators_*.json", r"bls_indicators_(\d{8})\.json", None),
     ("fed_press_releases_*.json", r"fed_press_releases_(\d{8})\.json", None),
     ("fx_indicators_*.json", r"fx_indicators_(\d{8})\.json", None),
+    ("market_news_*.json", r"market_news_(\d{8})\.json", None),
     ("screening_result_*.csv", r"screening_result_(\d{8})_\d{4}\.csv", None),
 ]
 

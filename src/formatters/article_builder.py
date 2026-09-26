@@ -237,6 +237,19 @@ def build_indicators_section(fred, bls):
     return "\n".join(lines)
 
 
+def build_market_headline_section(headline):
+    """FRB発表セクションの上に挿入する「今日の市場ニュース一言」。
+    src/fetchers/market_news.py がNHK経済カテゴリRSSから拾った、市場を動かした
+    その日のエピソード（例：要人発言・経済指標を受けた円高進行など）を1件だけ紹介する。
+    該当ニュースが無い日はセクション自体を省略する（2026-09-26追加）。"""
+    if not headline:
+        return ""
+    return (
+        f"> 📰 **今日の一言**：[{headline['title']}]({headline['link']})"
+        f"（NHK, {headline['pub_date']}）\n"
+    )
+
+
 def build_fed_section(fed):
     """FRB公式発表（一次情報）のセクション。新着があれば強調し、無ければ直近の発表を参考情報として載せる。
     金融政策プレスリリース（FOMC声明等）に加えて、議長の講演（ジャクソンホール会議等もこちら）も
@@ -503,6 +516,7 @@ def build_article():
     bls = _latest_json("bls_indicators_*.json")
     fed = _latest_json("fed_press_releases_*.json")
     fx = _latest_json("fx_indicators_*.json")
+    market_headline = _latest_json("market_news_*.json")
     candidates_data = _latest_json("us_premium_rotation_candidates.json")
     state = _latest_json("rotation_state.json")
     free_term, paid_term = pick_daily_terms(count=2)
@@ -518,6 +532,7 @@ def build_article():
         "",
         build_market_summary(fred),
         build_indicators_section(fred, bls),
+        build_market_headline_section(market_headline),
         build_fed_section(fed),
         build_jp_pick_section(),
         build_glossary_section([free_term]),
