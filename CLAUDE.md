@@ -306,9 +306,11 @@ Alpha Vantageは5リクエスト/分のレート制限があり、`OVERVIEW`取�
   `us_premium_rotation_candidates.json`が丸ごと上書きされ、business_descが消えてしまう
   （実際に今回消えた）。応急処置として、旧ファイル（gitの過去コミット）から重複する14銘柄分を
   復元し、新規27銘柄分（うちTEはtickerの実体に確信が持てず意図的に未記入とし、
-  Alpha Vantageのフォールバックに委ねた）を手動で追記した。**今後Stage Cを再実行する際は、
-  ルーチンのプロンプトにbusiness_descフィールドの生成も含めるよう更新し、
-  この手作業が毎回発生しないようにする必要がある**（未対応・要todo）。
+  Alpha Vantageのフォールバックに委ねた）を手動で追記した。
+  **対応済み（2026-09-28）**：ルーチンのプロンプトを更新し、`image_keyword`と同様に
+  `business_desc`（50〜100字の日本語事業説明。銘柄の実体に確信が持てない場合は空文字列とし、
+  Alpha Vantageのフォールバックに委ねる指示付き）も毎回生成・出力するようにした。
+  次回以降のStage C実行（次回定期実行は2026-10-03予定）からは、この手作業は不要になる想定。
 
 最終41銘柄：QBTS, AAOI, BFLY, ONDS, AMPX, DAVE, HUT, VICR, UAMY, PL, TTMI, OUST, IREN, APLD,
 AEVA, XMTR, ABCL, VIAV, AGX, CIFR, VSAT, FSLY, MP, TXG, LEU, INOD, WULF, FROG, SANM, POWL,
