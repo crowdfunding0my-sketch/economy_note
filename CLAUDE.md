@@ -285,6 +285,35 @@ Alpha Vantageは5リクエスト/分のレート制限があり、`OVERVIEW`取�
 - 今後Anthropic APIにクレジットを追加した場合は、Claude版（より「クリックしたくなる」煽り文）に
   戻すことを検討してもよい。
 
+### 候補プールの拡大：15銘柄→41銘柄（2026-09-26〜28）
+
+「毎日ローテーションしても15銘柄では少ない、1年で100銘柄くらい紹介したい」という要望を受けて対応。
+
+- **Stage B**（[src/fetchers/alpaca_price_trend.py](src/fetchers/alpaca_price_trend.py)）の
+  `SHORTLIST_SIZE`を60→150に拡大。時価総額上限（150億ドル）は現行候補の最大が114億ドルで
+  まだ余裕がありボトルネックではなかったため変更していない。
+- **Stage Cのクラウドルーチン**（`trig_015nGFr1XULrHXHUP6vjBZD6`）のプロンプトを更新し、
+  「上位15件に絞る」という固定上限を撤廃（通過した銘柄は全て採用）。150銘柄をチェックした結果、
+  最終的に**41銘柄**が通過（旧: 15銘柄固定）。
+- **つまずいた点（GitHub App権限）**：Stage Cのクラウドセッションは分析自体は成功するものの、
+  結果をGitHubにpushする段階で`403 Resource not accessible by integration`エラーが継続して
+  発生した。ユーザーがGitHub連携を再接続（claude.aiの設定から）した後も一度失敗し、
+  もう一度再接続してようやく解消した。クラウドルーチンの分析結果はセッション終了とともに
+  失われる（ローカルコミットのみでpushされていないと消える）ため、pushの成否は必ず確認すること。
+- **事業内容（business_desc）が消える問題**：Stage Cのプロンプトは`image_keyword`は
+  「自身の知識に基づいて判断する」よう指示していたが、2026-09-22に追加した`business_desc`
+  フィールドはプロンプトのスキーマに含まれていなかったため、Stage C実行のたびに
+  `us_premium_rotation_candidates.json`が丸ごと上書きされ、business_descが消えてしまう
+  （実際に今回消えた）。応急処置として、旧ファイル（gitの過去コミット）から重複する14銘柄分を
+  復元し、新規27銘柄分（うちTEはtickerの実体に確信が持てず意図的に未記入とし、
+  Alpha Vantageのフォールバックに委ねた）を手動で追記した。**今後Stage Cを再実行する際は、
+  ルーチンのプロンプトにbusiness_descフィールドの生成も含めるよう更新し、
+  この手作業が毎回発生しないようにする必要がある**（未対応・要todo）。
+
+最終41銘柄：QBTS, AAOI, BFLY, ONDS, AMPX, DAVE, HUT, VICR, UAMY, PL, TTMI, OUST, IREN, APLD,
+AEVA, XMTR, ABCL, VIAV, AGX, CIFR, VSAT, FSLY, MP, TXG, LEU, INOD, WULF, FROG, SANM, POWL,
+CDE, TE, HL, RIOT, GHM, MGTX, CAKE, LMND, BKSY, RMBS, LGCY
+
 ---
 
 ## 2. 海外株データ・ニュース（方針決定）

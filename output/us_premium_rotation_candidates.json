@@ -21,7 +21,8 @@
       "eps_curr": -1.11,
       "price_change_rate_2y": 16.6488,
       "trend_r2": 0.525,
-      "latest_close": 17.4
+      "latest_close": 17.4,
+      "business_desc": "量子アニーリング方式の量子コンピュータとクラウド経由の量子計算サービスを提供するカナダ発の企業。"
     },
     {
       "symbol": "AAOI",
@@ -34,7 +35,8 @@
       "eps_curr": -0.64,
       "price_change_rate_2y": 10.037,
       "trend_r2": 0.581,
-      "latest_close": 101.32
+      "latest_close": 101.32,
+      "business_desc": "データセンターや通信ネットワーク向けの光通信部品・レーザーモジュールを設計・製造する光学機器メーカー。"
     },
     {
       "symbol": "BFLY",
@@ -47,7 +49,8 @@
       "eps_curr": -0.31,
       "price_change_rate_2y": 8.6601,
       "trend_r2": 0.507,
-      "latest_close": 9.38
+      "latest_close": 9.38,
+      "business_desc": "半導体チップ内蔵で手のひらサイズの携帯型超音波検査装置「Butterfly iQ」を開発する医療機器企業。"
     },
     {
       "symbol": "ONDS",
@@ -60,7 +63,8 @@
       "eps_curr": -0.62,
       "price_change_rate_2y": 7.8225,
       "trend_r2": 0.717,
-      "latest_close": 7.635
+      "latest_close": 7.635,
+      "business_desc": "工場や鉄道など産業用IoT向けの専用無線ネットワークと、警備・点検用の自律型ドローンを手がける複合企業。"
     },
     {
       "symbol": "AMPX",
@@ -73,7 +77,8 @@
       "eps_curr": -0.35,
       "price_change_rate_2y": 7.7232,
       "trend_r2": 0.696,
-      "latest_close": 9.77
+      "latest_close": 9.77,
+      "business_desc": "ドローンや小型航空機、EV向けに、従来より高エネルギー密度のシリコンアノード式リチウムイオン電池を開発する企業。"
     },
     {
       "symbol": "DAVE",
@@ -86,7 +91,8 @@
       "eps_curr": 14.65,
       "price_change_rate_2y": 7.6482,
       "trend_r2": 0.802,
-      "latest_close": 324.74
+      "latest_close": 324.74,
+      "business_desc": "銀行口座と連携し、給料日前でも使える少額の立替金（キャッシュアドバンス）や家計管理機能を提供するフィンテック企業。"
     },
     {
       "symbol": "HUT",
@@ -99,7 +105,8 @@
       "eps_curr": -2.14,
       "price_change_rate_2y": 7.6165,
       "trend_r2": 0.763,
-      "latest_close": 96.85
+      "latest_close": 96.85,
+      "business_desc": "ビットコインのマイニング事業と、AI・高性能計算向けデータセンターの運営を手がける北米のインフラ企業。"
     },
     {
       "symbol": "VICR",
@@ -112,7 +119,8 @@
       "eps_curr": 2.63,
       "price_change_rate_2y": 6.3322,
       "trend_r2": 0.701,
-      "latest_close": 281.775
+      "latest_close": 281.775,
+      "business_desc": "データセンターやEV、航空宇宙・防衛分野向けに、高効率な電力変換モジュール（DC-DCコンバータ）を製造する企業。"
     },
     {
       "symbol": "UAMY",
@@ -125,7 +133,8 @@
       "eps_curr": -0.04,
       "price_change_rate_2y": 6.0978,
       "trend_r2": 0.579,
-      "latest_close": 4.5
+      "latest_close": 4.5,
+      "business_desc": "難燃剤や鉛蓄電池などに使われるレアメタル「アンチモン」の採掘・精錬を手がける、米国では数少ない生産会社。"
     },
     {
       "symbol": "PL",
@@ -138,7 +147,8 @@
       "eps_curr": -0.8,
       "price_change_rate_2y": 5.75,
       "trend_r2": 0.691,
-      "latest_close": 17.415
+      "latest_close": 17.415,
+      "business_desc": "小型衛星の群れで地球全体を毎日撮影し、農業や地図作成、環境監視向けに衛星画像データを提供する宇宙ベンチャー。"
     },
     {
       "symbol": "TTMI",
@@ -151,7 +161,8 @@
       "eps_curr": 1.73,
       "price_change_rate_2y": 5.4769,
       "trend_r2": 0.793,
-      "latest_close": 129.15
+      "latest_close": 129.15,
+      "business_desc": "航空宇宙・防衛、通信、自動車、医療機器向けに、プリント基板（PCB）やRF部品を製造する電子部品企業。"
     },
     {
       "symbol": "OUST",
@@ -164,7 +175,8 @@
       "eps_curr": -1.07,
       "price_change_rate_2y": 4.8425,
       "trend_r2": 0.721,
-      "latest_close": 43.76
+      "latest_close": 43.76,
+      "business_desc": "自動運転車やロボット、スマートインフラ向けに、レーザーで周囲を検知するLiDARセンサーを開発する企業。"
     },
     {
       "symbol": "IREN",
@@ -177,7 +189,8 @@
       "eps_curr": -2.22,
       "price_change_rate_2y": 4.6145,
       "trend_r2": 0.658,
-      "latest_close": 44.13
+      "latest_close": 44.13,
+      "business_desc": "再生可能エネルギーを使ったデータセンターで、ビットコインマイニングとAI向けGPUクラウドを運営する企業。"
     },
     {
       "symbol": "APLD",
@@ -190,7 +203,8 @@
       "eps_curr": -0.91,
       "price_change_rate_2y": 4.5625,
       "trend_r2": 0.72,
-      "latest_close": 26.255
+      "latest_close": 26.255,
+      "business_desc": "AI・高性能計算やビットコインマイニング向けに、大規模データセンターを開発・運営する新興インフラ企業。"
     },
     {
       "symbol": "AEVA",
@@ -203,7 +217,8 @@
       "eps_curr": -2.55,
       "price_change_rate_2y": 4.0328,
       "trend_r2": 0.449,
-      "latest_close": 15.35
+      "latest_close": 15.35,
+      "business_desc": "自動運転車や産業用途向けに、対象物の速度も同時に検知できるFMCW方式のLiDARセンサーを開発する企業。"
     },
     {
       "symbol": "XMTR",
@@ -216,7 +231,8 @@
       "eps_curr": -1.26,
       "price_change_rate_2y": 3.952,
       "trend_r2": 0.767,
-      "latest_close": 100.5
+      "latest_close": 100.5,
+      "business_desc": "3DプリントやCNC加工など、オンデマンド製造を発注者と全世界の製造パートナーとつなぐマーケットプレイス企業。"
     },
     {
       "symbol": "ABCL",
@@ -229,7 +245,8 @@
       "eps_curr": -0.49,
       "price_change_rate_2y": 3.8642,
       "trend_r2": 0.49,
-      "latest_close": 12.72
+      "latest_close": 12.72,
+      "business_desc": "AI・機械学習を活用した独自技術で、製薬会社向けに抗体医薬品の候補を発見・開発するバイオテック企業。"
     },
     {
       "symbol": "VIAV",
@@ -242,7 +259,8 @@
       "eps_curr": -0.13,
       "price_change_rate_2y": 3.7702,
       "trend_r2": 0.717,
-      "latest_close": 40.69
+      "latest_close": 40.69,
+      "business_desc": "通信・ケーブル網の試験・監視機器に加えて、紙幣等の偽造防止に使う光学顔料も手がける計測機器メーカー。"
     },
     {
       "symbol": "AGX",
@@ -255,7 +273,8 @@
       "eps_curr": 10.0,
       "price_change_rate_2y": 3.7639,
       "trend_r2": 0.79,
-      "latest_close": 365.15
+      "latest_close": 365.15,
+      "business_desc": "主に発電所（ガス火力・再生可能エネルギー）の設計・調達・建設（EPC）を請け負う米国の電力インフラ建設会社。"
     },
     {
       "symbol": "CIFR",
@@ -268,7 +287,8 @@
       "eps_curr": -2.15,
       "price_change_rate_2y": 3.7267,
       "trend_r2": 0.728,
-      "latest_close": 17.725
+      "latest_close": 17.725,
+      "business_desc": "米国内に大規模拠点を持つビットコインマイニング企業。電力効率の高いデータセンター運営を手がける。"
     },
     {
       "symbol": "VSAT",
@@ -281,7 +301,8 @@
       "eps_curr": -0.25,
       "price_change_rate_2y": 3.4036,
       "trend_r2": 0.869,
-      "latest_close": 73.1
+      "latest_close": 73.1,
+      "business_desc": "衛星通信サービスを提供する企業。一般家庭・航空機内Wi-Fi・政府や軍向けに衛星ブロードバンドを展開。"
     },
     {
       "symbol": "FSLY",
@@ -294,7 +315,8 @@
       "eps_curr": -0.83,
       "price_change_rate_2y": 3.1697,
       "trend_r2": 0.603,
-      "latest_close": 24.935
+      "latest_close": 24.935,
+      "business_desc": "世界中に分散配置したサーバーでウェブサイトの表示速度・セキュリティを高める、エッジクラウド企業。"
     },
     {
       "symbol": "MP",
@@ -307,7 +329,8 @@
       "eps_curr": -0.5,
       "price_change_rate_2y": 2.8194,
       "trend_r2": 0.56,
-      "latest_close": 48.85
+      "latest_close": 48.85,
+      "business_desc": "米国内で数少ないレアアース（希土類）の採掘・精製を行う企業。EVモーターや防衛関連需要を支える。"
     },
     {
       "symbol": "TXG",
@@ -320,7 +343,8 @@
       "eps_curr": -0.35,
       "price_change_rate_2y": 2.7968,
       "trend_r2": 0.423,
-      "latest_close": 85.75
+      "latest_close": 85.75,
+      "business_desc": "1細胞ごとの遺伝子解析を可能にする装置・試薬を開発・販売する、ゲノム解析分野のライフサイエンス企業。"
     },
     {
       "symbol": "LEU",
@@ -333,7 +357,8 @@
       "eps_curr": 4.33,
       "price_change_rate_2y": 2.7291,
       "trend_r2": 0.34,
-      "latest_close": 147.095
+      "latest_close": 147.095,
+      "business_desc": "原子力発電所向けに、核燃料となる濃縮ウランの製造・供給を行う米国のエネルギー企業。"
     },
     {
       "symbol": "INOD",
@@ -346,7 +371,8 @@
       "eps_curr": 1.01,
       "price_change_rate_2y": 2.5524,
       "trend_r2": 0.443,
-      "latest_close": 69.2
+      "latest_close": 69.2,
+      "business_desc": "AIモデルの学習に使うデータの収集・アノテーション（注釈付け）を手がけるデータエンジニアリング企業。"
     },
     {
       "symbol": "WULF",
@@ -359,7 +385,8 @@
       "eps_curr": -1.66,
       "price_change_rate_2y": 2.49,
       "trend_r2": 0.725,
-      "latest_close": 15.74
+      "latest_close": 15.74,
+      "business_desc": "水力・原子力など低炭素電源を使う自社拠点でビットコインマイニングを行う米国のインフラ企業。"
     },
     {
       "symbol": "FROG",
@@ -372,7 +399,8 @@
       "eps_curr": -0.62,
       "price_change_rate_2y": 2.2965,
       "trend_r2": 0.753,
-      "latest_close": 89.22
+      "latest_close": 89.22,
+      "business_desc": "ソフトウェアの開発・配布プロセスを管理する「DevOps」プラットフォーム「Artifactory」を提供する企業。"
     },
     {
       "symbol": "SANM",
@@ -385,7 +413,8 @@
       "eps_curr": 4.56,
       "price_change_rate_2y": 2.2596,
       "trend_r2": 0.818,
-      "latest_close": 224.78
+      "latest_close": 224.78,
+      "business_desc": "電子機器の受託製造（EMS）を手がける企業。通信・産業・医療・防衛向けに幅広く製品を生産する。"
     },
     {
       "symbol": "POWL",
@@ -398,7 +427,8 @@
       "eps_curr": 14.98,
       "price_change_rate_2y": 2.1057,
       "trend_r2": 0.663,
-      "latest_close": 189.6
+      "latest_close": 189.6,
+      "business_desc": "発電所や工場、石油・ガス施設向けに、電力を分配・制御する配電盤（スイッチギア）を製造する企業。"
     },
     {
       "symbol": "CDE",
@@ -411,7 +441,8 @@
       "eps_curr": 0.96,
       "price_change_rate_2y": 2.0133,
       "trend_r2": 0.729,
-      "latest_close": 19.225
+      "latest_close": 19.225,
+      "business_desc": "米国・カナダ・メキシコで銀・金の鉱山を運営する非鉄金属鉱山会社。北米有数の銀生産量を誇る。"
     },
     {
       "symbol": "TE",
@@ -437,7 +468,8 @@
       "eps_curr": 0.49,
       "price_change_rate_2y": 1.9143,
       "trend_r2": 0.676,
-      "latest_close": 18.2
+      "latest_close": 18.2,
+      "business_desc": "米国最大級の銀生産量を誇る鉱山会社。アイダホ州などで銀のほか金・鉛・亜鉛も産出している。"
     },
     {
       "symbol": "RIOT",
@@ -450,7 +482,8 @@
       "eps_curr": -1.95,
       "price_change_rate_2y": 1.9114,
       "trend_r2": 0.656,
-      "latest_close": 23
+      "latest_close": 23,
+      "business_desc": "テキサス州を拠点に大規模なビットコインマイニング施設を運営する米国の暗号資産インフラ企業。"
     },
     {
       "symbol": "GHM",
@@ -463,7 +496,8 @@
       "eps_curr": 1.14,
       "price_change_rate_2y": 1.7323,
       "trend_r2": 0.85,
-      "latest_close": 87.38
+      "latest_close": 87.38,
+      "business_desc": "防衛・エネルギー・製薬プラントなど向けに、真空・熱交換関連の産業機器を製造する企業。"
     },
     {
       "symbol": "MGTX",
@@ -476,7 +510,8 @@
       "eps_curr": -1.42,
       "price_change_rate_2y": 1.6618,
       "trend_r2": 0.741,
-      "latest_close": 10.9
+      "latest_close": 10.9,
+      "business_desc": "遺伝子治療（ジーンセラピー）を開発するバイオテック企業。眼科疾患や神経疾患などを対象とする。"
     },
     {
       "symbol": "CAKE",
@@ -489,7 +524,8 @@
       "eps_curr": 3.17,
       "price_change_rate_2y": 1.5752,
       "trend_r2": 0.574,
-      "latest_close": 104.5
+      "latest_close": 104.5,
+      "business_desc": "「チーズケーキファクトリー」を中心に、複数のレストランブランドを展開する米国の外食チェーン企業。"
     },
     {
       "symbol": "LMND",
@@ -502,7 +538,8 @@
       "eps_curr": -2.24,
       "price_change_rate_2y": 1.4738,
       "trend_r2": 0.53,
-      "latest_close": 44.9
+      "latest_close": 44.9,
+      "business_desc": "AIを活用したアプリで火災保険・賃貸保険・ペット保険などを提供する、保険テック（インシュアテック）企業。"
     },
     {
       "symbol": "BKSY",
@@ -515,7 +552,8 @@
       "eps_curr": -2.09,
       "price_change_rate_2y": 1.4008,
       "trend_r2": 0.652,
-      "latest_close": 23.24
+      "latest_close": 23.24,
+      "business_desc": "小型人工衛星群による高頻度の地球観測画像を、政府・防衛機関向けに提供する宇宙・地理空間情報企業。"
     },
     {
       "symbol": "RMBS",
@@ -528,7 +566,8 @@
       "eps_curr": 2.14,
       "price_change_rate_2y": 1.3333,
       "trend_r2": 0.702,
-      "latest_close": 105.16
+      "latest_close": 105.16,
+      "business_desc": "メモリー・半導体向けの高速データ転送技術を開発し、設計ライセンスやチップ製品を提供する半導体企業。"
     },
     {
       "symbol": "LGCY",
@@ -541,7 +580,8 @@
       "eps_curr": 0.73,
       "price_change_rate_2y": 1.3159,
       "trend_r2": 0.569,
-      "latest_close": 9.495
+      "latest_close": 9.495,
+      "business_desc": "テキサス州を拠点に、工場生産のマニュファクチュアードホーム（組立式住宅）を製造・販売する住宅企業。"
     }
   ]
 }
