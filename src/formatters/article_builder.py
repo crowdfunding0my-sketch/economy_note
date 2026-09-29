@@ -511,6 +511,21 @@ def build_hashtags(fred, bls, fed):
     return " ".join(tags)
 
 
+def build_toc(body_text):
+    """本文（見出し以降のセクション群）から「## 」見出しを拾って目次を組み立てる。
+    見出しの文言は曜日・データ状況によって毎日変わりうる（例：週末を挟んだ日は
+    「週末の海外市場サマリー」になる）ため、固定文言をハードコードするのではなく、
+    実際に生成された本文から動的に抽出することで、目次と本文の見出しが必ず一致するようにしている。
+    （2026-09-29追加、ユーザー要望）"""
+    headings = [line[3:].strip() for line in body_text.split("\n") if line.startswith("## ")]
+    if not headings:
+        return ""
+    lines = ["## 目次", ""]
+    lines += [f"- {h}" for h in headings]
+    lines.append("")
+    return "\n".join(lines)
+
+
 def build_article():
     fred = _latest_json("fred_indicators_*.json")
     bls = _latest_json("bls_indicators_*.json")
@@ -523,13 +538,7 @@ def build_article():
 
     today = datetime.now(JST).strftime("%Y/%m/%d")
 
-    parts = [
-        f"# 【{today}】市場サマリーと注目銘柄ピックアップ",
-        "",
-        "昨日の海外市場の値動きと主要経済指標を振り返るとともに、独自スクリーニングで絞り込んだ本日の注目銘柄をお届けします。",
-        "",
-        "---",
-        "",
+    body_parts = [
         build_market_summary(fred),
         build_indicators_section(fred, bls),
         build_market_headline_section(market_headline),
@@ -551,6 +560,18 @@ def build_article():
         "",
         build_hashtags(fred, bls, fed),
         "",
+    ]
+    body_text = "\n".join(body_parts)
+
+    parts = [
+        f"# 【{today}】市場サマリーと注目銘柄ピックアップ",
+        "",
+        "昨日の海外市場の値動きと主要経済指標を振り返るとともに、独自スクリーニングで絞り込んだ本日の注目銘柄をお届けします。",
+        "",
+        build_toc(body_text),
+        "---",
+        "",
+        body_text,
     ]
     return "\n".join(parts)
 
