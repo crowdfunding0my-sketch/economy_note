@@ -551,7 +551,7 @@ def build_article():
         "",
         "<!-- PAYWALL -->",
         "",
-        "## ここから有料エリア",
+        "## 本日の米国株ピックアップ（有料エリア）",
         "",
         build_us_pick_full(candidates_data, state) if candidates_data and state else "",
         build_fx_section(fx),
